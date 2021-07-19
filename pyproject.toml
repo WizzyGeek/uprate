@@ -1,0 +1,24 @@
+
+[tool.poetry]
+name = "uprate"
+version = "0.1.0"
+description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
+authors = ["WizzyGeek <ojasscoding@gmail.com>"]
+license = "MIT"
+keywords = ["ratelimits", "limits", "ratelimit"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -12,12 +12,19 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
 ]
+readme = "README.md"
+
+[tool.poetry.urls]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 
+[tool.poetry.extras]
+
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
+
+[tool.mypy]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

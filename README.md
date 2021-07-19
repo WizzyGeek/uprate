@@ -6,7 +6,11 @@
     <h1></h1>
 </div>
 
+<p align="center">
 A fully typed, simple ratelimit library.
+</p>
+
+> Note: The project is still in planning
 
 ## Installation
 
@@ -18,3 +22,7 @@ pip install uprate
 
 Document will be available soon!
 
+<div align="center">
+    <h1></h1>
+    <h6>© WizzyGeek 2021</h6>
+</div>

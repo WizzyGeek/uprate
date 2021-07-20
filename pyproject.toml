@@ -18,13 +18,26 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+Sphinx = {version = "^4.1.1", optional = true}
 
 [tool.poetry.extras]
+docs = ["Sphinx"]
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
 
 [tool.mypy]
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unused_configs = true
+files = ["uprate", "tests"]
+exclude = "docs/"
+python_version = "3.9"
+
+[tool.pyright]
+include = ["uprate"]
+exclude = ["docs", ".venv", ".git", "**/__pycache__", ".mypy_cache"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

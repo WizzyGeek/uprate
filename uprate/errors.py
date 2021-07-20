@@ -13,7 +13,7 @@ __all__ = (
 )
 
 class RateLimitError(Exception):
-    """[summary]
+    """Raised when a Rate Limit is violated.
 
     Attributes
     ----------

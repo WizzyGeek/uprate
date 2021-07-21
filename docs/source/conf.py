@@ -26,13 +26,21 @@ copyright = '2021, WizzyGeek'
 author = 'WizzyGeek'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
 
-with (Path(__file__).parents[2] / "pyproject.toml").open("r") as f:
-    for i in f.readlines():
-        if "version" in i:
-            release = i.split("=")[1].strip('" \n')
-            break
+try:
+    from uprate import __version__ as release
+except (ModuleNotFoundError, ImportError):
+    release = None
+
+    with (Path(__file__).parents[2] / "pyproject.toml").open("r") as f:
+        for i in f.readlines():
+            if "version" in i:
+                release = i.split("=")[1].strip('" \n')
+                break
+
+if release is None: # fail early
+    raise RuntimeError("Could not get uprate's version")
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -40,7 +48,21 @@ with (Path(__file__).parents[2] / "pyproject.toml").open("r") as f:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autodoc",
+    "myst_parser",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon"
 ]
+
+autodoc_member_order = 'bysource'
+
+
+# MyST extensions
+myst_enable_extensions = [
+    "colon_fence"
+]
+
+suppress_warnings = ["myst.header"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -55,10 +77,30 @@ exclude_patterns = []
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
 html_theme = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+html_theme_options = {
+    "logo": "uprate_icon.png",
+}
+
+_up_static = Path(__file__).parent / "_static"
+
+from os import getenv as _up_env
+
+rtd = _up_env("READTHEDOCS")
+def _up_css_path(file: str) -> str:
+    if rtd:
+        return file
+    if (_up_static / file).is_file():
+        return file
+    return "css/" + file
+
+def setup(app):
+    app.add_css_file(_up_css_path("custom.css"))

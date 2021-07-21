@@ -239,3 +239,6 @@ $RECYCLE.BIN/
 .vs/
 .vscode/
 .idea/
+
+# Dev compiled css files
+docs/source/_static/*.css*

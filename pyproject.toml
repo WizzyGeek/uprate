@@ -19,12 +19,14 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 Sphinx = {version = "^4.1.1", optional = true}
+myst-parser = {version = "^0.15.1", optional = true}
 
 [tool.poetry.extras]
-docs = ["Sphinx"]
+docs = ["Sphinx", "myst-parser"]
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
+pytest = "^6.2.4"
 
 [tool.mypy]
 show_error_codes = true

@@ -1,0 +1,33 @@
+on:
+  push:
+    paths:
+      - '**.scss'
+
+jobs:
+  build_css:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source Git branch
+        uses: actions/checkout@v2
+
+      - name: Compile CSS from SCSS files
+        uses: gha-utilities/sass-build@latest
+        with:
+          source: |
+            docs/source/_static/custom.scss
+          destination: |
+            docs/source/_static/css/custom.css
+
+      - name: Add and Commit changes to pr-pages branch
+        run: |
+          git config --local user.email 'action@github.com'
+          git config --local user.name 'Sass Compile GitHub Action'
+          git add docs/source/_static/css/*
+          git commit -m '[🤖] Updates compiled CSS files'
+
+       - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}

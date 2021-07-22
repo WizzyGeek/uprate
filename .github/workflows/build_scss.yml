@@ -26,7 +26,7 @@ jobs:
           git add docs/source/_static/css/*
           git commit -m '[🤖] Updates compiled CSS files'
 
-       - name: Push changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

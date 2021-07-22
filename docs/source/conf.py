@@ -92,12 +92,10 @@ html_theme_options = {
 
 _up_static = Path(__file__).parent / "_static"
 
-from os import getenv as _up_env
-
-rtd = _up_env("READTHEDOCS")
+# Use css files in _static if present,
+# This will only happen in a dev environment where
+# scss is being watched.
 def _up_css_path(file: str) -> str:
-    if rtd:
-        return file
     if (_up_static / file).is_file():
         return file
     return "css/" + file

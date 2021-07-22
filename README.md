@@ -12,6 +12,7 @@ A fully typed, simple ratelimit library.
 
 > Note: The project is still in planning
 
+
 ## Installation
 
 ```
@@ -20,10 +21,10 @@ pip install uprate
 
 ## Documentation
 
-Document will be available soon!
+Documentation is currently under development.
 
 <div align="center">
     <h1></h1>
-    <h6>Thanks to @someonetookmycode for the graphical assets</h6><br/>
+    <h6>Thanks to <a href="https://github.com/someonetookmycode">@someonetookmycode</a> for the graphical assets</h6>
     <h6>© WizzyGeek 2021</h6>
 </div>

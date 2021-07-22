@@ -88,6 +88,8 @@ html_static_path = ['_static']
 
 html_theme_options = {
     "logo": "uprate_icon.png",
+    "logo_name": True,
+    "logo_text_align": "center"
 }
 
 _up_static = Path(__file__).parent / "_static"

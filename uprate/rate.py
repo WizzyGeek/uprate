@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Union
 
 __all__ = (
@@ -38,11 +39,14 @@ class Rate:
     Used to define rates for ratelimits
     with syntatical expressions.
 
+    You should refrain from creating your own Rate objects
+    and instead use the objects provided in the library.
+
     Attributes
     ----------
-    uses
+    uses: int
         Number of uses per time period
-    period
+    period: float
         The time period of the rate in seconds
     """
     uses: int
@@ -103,43 +107,45 @@ class Rate:
         return False
 
 
+Seconds = Rate(1, 1)
 """A Rate of 1 use / 1 Second
 Used in syntatical expression to define rate
 
 Example
 -------
-::python
+.. code-block:: python
 
     assert 2 / Seconds(3) == 2 / (3 * Seconds)
     ...
     # 30 uses per 2 min 30 sec but also 2 uses per 2 seconds
-    api_rate: tuple[Rate] = 2/Seconds(2) | 30/(2 * Minutes + 30 * seconds)
+    api_rate: uprate.rate._RateGroup = 2/Seconds(2) | 30/(2 * Minutes + 30 * seconds)
 
 """
-Seconds = Rate(1, 1)
 
-"""Rate of 1 use / 1 Minute"""
 Minutes = 60 * Seconds
+"""Rate of 1 use / 1 Minute"""
 
-"""Rate of 1 use / 1 Hour"""
 Hours = 60 * Minutes
+"""Rate of 1 use / 1 Hour"""
 
-"""Rate of 1 use / 1 Day"""
 Days = 24 * Hours
+"""Rate of 1 use / 1 Day"""
 
-"""Rate of 1 use / 1 Week"""
 Weeks = 7 * Days
+"""Rate of 1 use / 1 Week"""
 
+Months = 30 * Days
 """Rate of 1 use / 1 Month
 
-.. note::
 
-    If you need larger time periods you can create them by
-    ::py
+Note
+----
+If you need larger time periods you can create them by
 
-        Year = Rate(1, 60 * 60 * 24 * 365)
-        # Proceed to use like other unitary use rates
-        rate = 5 / Year(2) # 5 uses per 2 years
+.. code-block:: python
+
+    Year = Rate(1, 60 * 60 * 24 * 365)
+    # Proceed to use like other unitary use rates
+    rate = 5 / Year(2) # 5 uses per 2 years
 
 """
-Months = 30 * Days

@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Compile CSS from SCSS files
-        uses: gha-utilities/sass-build@0.4.4
+        uses: gha-utilities/sass-build@v0.4.4
         with:
           source: |
             docs/source/_static/custom.scss

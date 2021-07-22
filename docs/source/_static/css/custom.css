@@ -1,6 +1,1 @@
-/* TODO: Compile all scss in this folder to css on commit */
-p.logo img {
-  width: 75px;
-  height: 75px;
-}
-/*# sourceMappingURL=custom.css.map */
+p.logo img{width:75px;height:75px}

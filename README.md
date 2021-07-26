@@ -2,18 +2,18 @@
     <img src="https://github.com/WizzyGeek/WizzyGeek/raw/main/assets/uprate/uprate_logo_rev2.png">
     <h1></h1>
     <img src="https://forthebadge.com/images/badges/made-with-python.svg">
-    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
+    <img src="https://forthebadge.com/images/badges/built-with-love.svg"> <br/>
+    A fully typed, simple ratelimit library.
     <h1></h1>
 </div>
 
-<p align="center">
-A fully typed, simple ratelimit library.
-</p>
+
+## About
 
 Uprate is a robust, simple to use ratelimit library.
 While providing a simple to use api, it is also highly scalable
 and provides absolute control for fine-tuning. Hence, Uprate
-can be used in all stages of you app from prototyping to production! 🚀
+can be used in all stages of your app from prototyping to production! 🚀
 
 > Note: The project is still in planning
 

@@ -1,32 +1,77 @@
-<div align="center">
+<h1 align="center">
     <img src="https://github.com/WizzyGeek/WizzyGeek/raw/main/assets/uprate/uprate_logo_rev2.png">
-    <h1></h1>
-    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
-    <img src="https://forthebadge.com/images/badges/built-with-love.svg"> <br/>
+</h1>
+
+<div align="center">
     A fully typed, simple ratelimit library.
-    <h1></h1>
 </div>
 
+<div align="center">
+    <br/>
+    <img src="https://forthebadge.com/images/badges/made-with-python.svg">
+    <img src="https://forthebadge.com/images/badges/built-with-love.svg">
+</div>
 
-## About
-
-Uprate is a robust, simple to use ratelimit library.
-While providing a simple to use api, it is also highly scalable
-and provides absolute control for fine-tuning. Hence, Uprate
-can be used in all stages of your app from prototyping to production! 🚀
+<hr/>
 
 > Note: The project is still in planning
 
+## About
+
+Uprate is a robust, simple to use ratelimit library.<br/>
+While providing a simple to use api, it is also highly scalable
+and provides absolute control for fine-tuning.<br/> Hence, Uprate
+can be used in all stages of your app from prototyping to production! 🚀
+<br/>
+[Here](#example) is a simple example.
+
+## [Documentation](https://uprate.readthedocs.io/en/latest/)
+
+> The documentation is currently in development! Please stay tuned!
+
+The documentation can be found at <https://uprate.readthedocs.io/en/latest/> <br/>
+
+# Getting Started
 
 ## Installation
 
+You can install the latest stable version from pypi by
 ```
 pip install uprate
 ```
+*or* you can install the dev version from github
+```
+pip install git+https://github.com/WizzyGeek/uprate.git@master#egg=uprate
+```
+## Usage
 
-## Documentation
+```
+import uprate
+```
 
-Documentation is currently under development.
+And you are good to go! 🤘
+
+## Example
+
+> This example is not implemented yet.
+
+```py
+import uprate
+
+@uprate.ratelimit(1 / (2 * uprate.Seconds + uprate.Minute))
+def limited():
+    ...
+
+limited()
+
+try:
+    # Within 62 seconds
+    limited()
+except uprate.RateLimitError:
+    print("called function too fast")
+```
+
+And **so much more**!
 
 <div align="center">
     <h1></h1>

@@ -10,6 +10,11 @@
 A fully typed, simple ratelimit library.
 </p>
 
+Uprate is a robust, simple to use ratelimit library.
+While providing a simple to use api, it is also highly scalable
+and provides absolute control for fine-tuning. Hence, Uprate
+can be used in all stages of you app from prototyping to production! 🚀
+
 > Note: The project is still in planning
 
 

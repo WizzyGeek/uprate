@@ -20,9 +20,10 @@ readme = "README.md"
 python = "^3.9"
 Sphinx = {version = "^4.1.1", optional = true}
 myst-parser = {version = "^0.15.1", optional = true}
+furo = {version = "^2021.7.5-beta.38", optional = true}
 
 [tool.poetry.extras]
-docs = ["Sphinx", "myst-parser"]
+docs = ["Sphinx", "myst-parser", "furo"]
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"

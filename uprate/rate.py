@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Union
+from time import monotonic as _now
+from typing import Union, Optional
 
 __all__ = (
     "Rate",
@@ -13,6 +14,8 @@ __all__ = (
 )
 
 class _RateGroup:
+    __slots__ = ("_data",)
+
     _data: list[Rate]
 
     def __init__(self):
@@ -49,6 +52,8 @@ class Rate:
     period: float
         The time period of the rate in seconds
     """
+    __slots__ = ("uses", "period")
+
     uses: int
     period: float
 

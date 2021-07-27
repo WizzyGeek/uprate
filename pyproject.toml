@@ -21,9 +21,10 @@ python = "^3.9"
 Sphinx = {version = "^4.1.1", optional = true}
 myst-parser = {version = "^0.15.1", optional = true}
 furo = {version = "^2021.7.5-beta.38", optional = true}
+sphinx-copybutton = {version = "^0.4.0", optional = true}
 
 [tool.poetry.extras]
-docs = ["Sphinx", "myst-parser", "furo"]
+docs = ["Sphinx", "myst-parser", "furo", "sphinx-copybutton"]
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"

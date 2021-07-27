@@ -16,14 +16,26 @@
 
 > Note: The project is still in planning
 
-## About
+# About
 
-Uprate is a robust, simple to use ratelimit library.<br/>
+Uprate is a robust, simple ratelimit library.<br/>
 While providing a simple to use api, it is also highly scalable
 and provides absolute control for fine-tuning.<br/> Hence, Uprate
 can be used in all stages of your app from prototyping to production! 🚀
 <br/>
 [Here](#example) is a simple example.
+
+## Why?
+
+There are two ways ratelimits are implemented in python
+ - Make everything from scratch
+ - Use a framework dependent ratelimit library.
+
+The problem in the first way is obvious, it's harder, consumes more time.<br/>
+Using a framework dependent ratelimit library is more feasible, but often
+these libraries don't provide features like external stores, multiple ratelimits
+and manual key specification. While there are some awesome ratelimit libraries for
+framwork X, not everyone uses framework X 😕.
 
 ## [Documentation](https://uprate.readthedocs.io/en/latest/)
 
@@ -53,12 +65,14 @@ And you are good to go! 🤘
 
 ## Example
 
-> This example is not implemented yet.
+> This example is not fully implemented, yet.
+
+Here is a simple example that demonstrates Uprate's Awesomeness.
 
 ```py
 import uprate
 
-@uprate.ratelimit(1 / (2 * uprate.Seconds + uprate.Minute))
+@uprate.ratelimit(1 / (uprate.Seconds(2) + uprate.Minutes(1)))
 def limited():
     ...
 

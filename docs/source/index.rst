@@ -22,8 +22,7 @@ Welcome to uprate's documentation.
    :maxdepth: 2
    :caption: Contents
 
-   api/rate.rst
-   api/ratelimit.rst
+   api/index.md
 
 Indices and tables
 ------------------

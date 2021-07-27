@@ -12,6 +12,7 @@ __all__ = (
     "RateLimit"
 )
 
+# This entire thing maybe incompatible with the concept of stores *sigh*
 
 H = TypeVar("H", bound=Hashable)
 """A TypeVar bound to :class:`collections.abc.Hashable`"""

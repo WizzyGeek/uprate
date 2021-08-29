@@ -14,7 +14,13 @@ classifiers = [
 ]
 readme = "README.md"
 
+homepage = "https://github.com/WizzyGeek/uprate#readme"
+repository = "https://github.com/WizzyGeek/uprate"
+documentation = "https://uprate.readthedocs.io/en/latest/"
+
 [tool.poetry.urls]
+"Bug Tracker" = "https://github.com/WizzyGeek/uprate/issues"
+"Discord" = "https://discord.gg/NAkQDHvvJK"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -35,7 +41,7 @@ show_error_codes = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unused_configs = true
-files = ["uprate", "tests"]
+files = ["uprate", "tests", "uprate/sync"]
 exclude = "docs/"
 python_version = "3.9"
 

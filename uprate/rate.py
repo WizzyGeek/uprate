@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from time import monotonic as _now
 from typing import Union, Optional
 
 __all__ = (
@@ -110,6 +109,13 @@ class Rate:
         if isinstance(other, self.__class__):
             return not (self == other)
         return False
+
+    def __hash__(self) -> int:
+        # This might be a bad idea
+        return hash((self.uses, self.period))
+
+    def __str__(self) -> str:
+        return f"{self.uses}/{self.period}"
 
 
 Seconds = Rate(1, 1)

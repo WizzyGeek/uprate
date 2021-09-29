@@ -46,7 +46,8 @@ python_version = "3.9"
 
 [tool.pyright]
 include = ["uprate"]
-exclude = ["docs", ".venv", ".git", "**/__pycache__", ".mypy_cache"]
+exclude = ["docs", ".git", "**/__pycache__", ".mypy_cache"]
+ignore = [".venv"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

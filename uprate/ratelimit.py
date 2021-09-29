@@ -1,42 +1,48 @@
 from __future__ import annotations
 
 from operator import attrgetter
-from typing import Optional, Union, Generic, TypeVar, cast
-from collections.abc import Hashable
+from typing import Generic, Optional, TypeVar, Union
+
 from uprate.store import BaseStore, MemoryStore
 
-from .rate import Rate, _RateGroup
 from .errors import RateLimitError
+from .rate import Rate, _RateGroup
 
 __all__ = (
     "RateLimit"
 )
 
-# This entire thing maybe incompatible with the concept of stores *sigh*
-
-H = TypeVar("H", bound=Hashable)
-"""A TypeVar bound to :class:`collections.abc.Hashable`"""
+H = TypeVar("H")
+"""A TypeVar"""
 
 
 class RateLimit(Generic[H]):
-    """Enforces ratelimits per multiple keys
+    """Enforces multiple rates per provided keys.
+    This is a low-level component.
 
     Attributes
     ----------
     rates : tuple[:class:`uprate.rate.Rate`]
         A tuple of :class:`uprate.rate.Rate` sorted in ascending order by the rate's
         time period.
+
+    store: Optional[BaseStore]
+        The Store in use for this RateLimit.
     """
     rates: tuple[Rate, ...]
-    store: BaseStore
+    store: BaseStore[H]
 
-    def __init__(self, rate: Union[Rate, _RateGroup], store: Optional[BaseStore] = None) -> None:
-        """Constructor for
+    def __init__(self, rate: Union[Rate, _RateGroup], store: Optional[BaseStore[H]] = None) -> None:
+        """Constructor for :class:`.RateLimit`
 
         Parameters
         ----------
         rate: Union[:class:`uprate.rate.Rate`, :class:`uprate.rate._RateGroup`]
             The rate(s) to enforce on keys in this ratelimits.
+
+        store: Optional[BaseStore]
+            The Store to use for this RateLimit, If None then a :class:`uprate.store.MemoryStore` is used.
+            By default, :data:`None`.
 
         Raises
         ------
@@ -76,7 +82,8 @@ class RateLimit(Generic[H]):
         res, retry, rate = await self.store.acquire(key)
 
         if not res:
-            # Could use cast here, but it is gross.
+            # cast is ugly, overloads don't work (parameters don't change)
+            # TODO: https://www.python.org/dev/peps/pep-0647/
             raise RateLimitError(retry_after=retry, rate=rate) # type: ignore[arg-type]
 
     async def reset(self, key: H = None) -> None:

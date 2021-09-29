@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from typing import Protocol, TYPE_CHECKING, Optional, TypeVar, Union, runtime_checkable
 from abc import abstractmethod
 from collections.abc import Hashable
 from time import monotonic as _now
+from typing import (TYPE_CHECKING, Optional, Protocol, TypeVar, Union,
+                    runtime_checkable)
 
 if TYPE_CHECKING:
     from .rate import Rate
     from .ratelimit import RateLimit
+
+__all__ = (
+    "BaseStore",
+    "MemoryStore"
+)
 
 T = TypeVar("T", contravariant=True)
 H = TypeVar("H", contravariant=True, bound=Hashable)
@@ -18,7 +24,10 @@ class BaseStore(Protocol[T]):
 
     def setup(self, ratelimit: RateLimit):
         """Adds the ratelimit that this store is bound to as an
-        attribute under :attr:`.BaseStore.limit`.
+        attribute under :attr:`.BaseStore.limit`. This method exists
+        only to create a circular reference between the store and ratelimit.
+        :attr:`uprate.RateLimit.rates` attribute allows the store to access
+        all implemented rates.
 
         Parameters
         ----------
@@ -51,12 +60,16 @@ class BaseStore(Protocol[T]):
         -------
         tuple[:class:`bool`, :class:`float`, Optional[:class:`uprate.rate.Rate`]]
             A three element tuple, the first element of type :class:`bool` depicting success.
-            second element :class:`float` which is the amount of time to retry in, If a usage
+
+            Second element :class:`float` which is the amount of time to retry in, If a usage
             token was acquired this should return ``0`` other-wise the time in which a
             usage token will be available. If the store does not support retry time then it
-            should return a negative value like ``-1``. The last element is the :class:`uprate.rate.Rate`
-            object which was violated, this must be the rate which will take the longest to reset. The
-            last element is expected to be :data:`None` if acquiring was successfull.
+            should return a negative value like ``-1`` (negative values shall be returned only on
+            failure if the retry time cannot be determined).
+
+            The last element is the :class:`uprate.rate.Rate` object which was violated,
+            this must be the rate which will take the longest to reset. The last element is
+            expected to be :data:`None` if acquiring was successfull.
         """
         ...
 
@@ -74,7 +87,7 @@ class BaseStore(Protocol[T]):
 
     @abstractmethod
     async def clear(self) -> None:
-        """Free the resources occupied by the store.
+        """Reset all the keys in the store.
 
         Returns
         -------
@@ -88,6 +101,10 @@ class MemoryStore(BaseStore[H]):
     def __init__(self):
         self._data = {}
         self._last_verified = 0.0
+        self.limit = 0
+
+    def setup(self, ratelimit: RateLimit):
+        super().setup(ratelimit)
         self._max_period = self.limit.rates[-1].period
 
     async def acquire(self, key: H) -> tuple[bool, float, Optional[Rate]]:

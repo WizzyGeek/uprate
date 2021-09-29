@@ -4,7 +4,7 @@ from asyncio import iscoroutinefunction, sleep
 from collections.abc import Coroutine
 from functools import wraps
 from time import sleep as block
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, Union, cast, overload
 
 from ._sync import SyncRateLimit, SyncStore
 from ._utils import maybe_awaitable
@@ -22,25 +22,79 @@ __all__ = (
 )
 
 Key = TypeVar("Key")
+R = TypeVar("R", covariant=True)
+
+AnyRateLimit = Union[SyncRateLimit, RateLimit]
+
+class LimitedCallable(Protocol[R]):
+    limit: AnyRateLimit
+
+    def __call__(self, *args, **kwds) -> R:
+        ...
+
+def _apply_attrs(func: Callable[..., R], **attrs) -> LimitedCallable[R]:
+    func = cast(LimitedCallable[R], func)
+
+    for k, v in attrs.items():
+        setattr(func, k, v)
+
+    return func
 
 async def on_retry_sleep(error: RateLimitError) -> None:
+    """Make the current task yield to the event_loop
+    till a usage token is available for the rate limit
+    which raised :exc:`uprate.RateLimitError`
+
+    Parameters
+    ----------
+    error : :exc:`RateLimitError`
+        The rate limit error to sleep for.
+    """
     await sleep(error.retry_after)
 
 def on_retry_block(error: RateLimitError) -> None:
+    """Block the current thread till a usage token is
+    available for the rate limit which raised
+    :exc:`uprate.RateLimitError`
+
+    Parameters
+    ----------
+    error : RateLimitError
+        The rate limit error to block for.
+    """
     block(error.retry_after)
 
+# TODO: Complete Docs
 def ratelimit(
-        rate: Union[Rate, _RateGroup], *,
-        key: Callable[..., Union[Key, Coroutine[Any, Any, Key]]] = None,
-        on_retry: Callable[[RateLimitError], Union[Any, Coroutine]] = None,
-        store: Union[BaseStore, SyncStore] = None
-    ) -> Callable:
+    rate: Union[Rate, _RateGroup], *,
+    key: Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]] = None,
+    on_retry: Union[Callable[[RateLimitError], Any], Callable[[RateLimitError], Coroutine[Any, Any, Any]]] = None,
+    store: Union[BaseStore, SyncStore] = None
+):
+    """Limit a coroutine function or a callable to be called within
+    provided rate.
 
-    def decorator(func):
-        nonlocal on_retry
+    Parameters
+    ----------
+    rate : Union[Rate, _RateGroup]
+        The rate that the decorated function must follow.
+    key : Optional[Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]]]
+        The callback for generating a bucket for ratelimit from the arguments provided
+        to the decorated function, this can be a coroutine function only when the decorated
+        is a coroutine function as well. If None, a default callback returning a string based on the
+        decorated function's name is used, by default None.
+    on_retry : Optional[Union[Callable[[RateLimitError], Any], Callable[[RateLimitError], Coroutine[Any, Any, Any]]]]
+        [description], by default None
+    store : Union[BaseStore, SyncStore], optional
+        [description], by default None
+    """
+    def decorator(func: Callable[..., R]) -> LimitedCallable[R]:
+        nonlocal on_retry, key
+        key = key or cast(Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + func.__name__)
+
         if iscoroutinefunction(func):
             if isinstance(store, BaseStore) or store is None:
-                limit = RateLimit(rate, store)
+                limit: AnyRateLimit = RateLimit(rate, store)
             else:
                 raise TypeError("Cannot use a uprate._sync.SyncStore instance with a coroutine function.")
 
@@ -77,7 +131,6 @@ def ratelimit(
                     else:
                         return func()
 
-        rated.limit = limit
-        return rated
+        return _apply_attrs(rated, limit=limit)
 
     return decorator

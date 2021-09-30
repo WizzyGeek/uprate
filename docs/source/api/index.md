@@ -9,4 +9,7 @@ The following section is about uprate's python API.
 
 rate.rst
 ratelimit.rst
+store.rst
+decorators.rst
+errors.rst
 ```

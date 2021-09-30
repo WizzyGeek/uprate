@@ -9,7 +9,7 @@ from .errors import RateLimitError
 from .rate import Rate, _RateGroup
 
 __all__ = (
-    "RateLimit"
+    "RateLimit",
 )
 
 H = TypeVar("H")

@@ -43,11 +43,11 @@ def _apply_attrs(func: Callable[..., R], **attrs) -> LimitedCallable[R]:
 async def on_retry_sleep(error: RateLimitError) -> None:
     """Make the current task yield to the event_loop
     till a usage token is available for the rate limit
-    which raised :exc:`uprate.RateLimitError`
+    which raised :exc:`uprate.errors.RateLimitError`
 
     Parameters
     ----------
-    error : :exc:`RateLimitError`
+    error : :exc:`.RateLimitError`
         The rate limit error to sleep for.
     """
     await sleep(error.retry_after)
@@ -55,11 +55,11 @@ async def on_retry_sleep(error: RateLimitError) -> None:
 def on_retry_block(error: RateLimitError) -> None:
     """Block the current thread till a usage token is
     available for the rate limit which raised
-    :exc:`uprate.RateLimitError`
+    :exc:`uprate.errors.RateLimitError`
 
     Parameters
     ----------
-    error : RateLimitError
+    error : :exc:`.RateLimitError`
         The rate limit error to block for.
     """
     block(error.retry_after)
@@ -72,7 +72,7 @@ def ratelimit(
     store: Union[BaseStore, SyncStore] = None
 ):
     """Limit a coroutine function or a callable to be called within
-    provided rate.
+    provided rate. :ref:`Example here <index-example>`
 
     Parameters
     ----------
@@ -81,12 +81,21 @@ def ratelimit(
     key : Optional[Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]]]
         The callback for generating a bucket for ratelimit from the arguments provided
         to the decorated function, this can be a coroutine function only when the decorated
-        is a coroutine function as well. If None, a default callback returning a string based on the
-        decorated function's name is used, by default None.
-    on_retry : Optional[Union[Callable[[RateLimitError], Any], Callable[[RateLimitError], Coroutine[Any, Any, Any]]]]
-        [description], by default None
-    store : Union[BaseStore, SyncStore], optional
-        [description], by default None
+        is a coroutine function as well. If :data:`None`, a default callback returning a string based on the
+        decorated function's name is used, by default :data:`None`.
+    on_retry : Optional[Union[Callable[[:exc:`.RateLimitError`], Any], Callable[[:exc:`.RateLimitError`], Coroutine[Any, Any, Any]]]]
+        If provided then this function will be called when the function gets ratelimited
+        and then the decorated function will be called again, if :data:`None` then function call isn't retried
+        and :exc:`.RateLimitError` is raised, by default :data:`None`.
+    store : Optional[Union[:class:`.BaseStore`, :class:`.SyncStore`]]
+        The store to use for the rate limit, must be of type :class:`.BaseStore` if
+        decorated function is a coroutine function else :class:`.SyncStore`.
+        If :data:`None` then a suitable derived memory store is used, by default :data:`None`.
+
+    Raises
+    ------
+    :exc:`.RateLimitError`
+        ``on_retry`` parameter is not provided and the decorated function got ratelimited.
     """
     def decorator(func: Callable[..., R]) -> LimitedCallable[R]:
         nonlocal on_retry, key

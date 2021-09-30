@@ -20,6 +20,16 @@ H = TypeVar("H", contravariant=True, bound=Hashable)
 
 @runtime_checkable
 class BaseStore(Protocol[T]):
+    """A protocol defining the design of async stores.
+    This is generic in TypeVar :data:`uprate.store.T` which is unbound and unconstrained.
+
+    Subclasses implementing this protocol should inherit from this class.
+
+    Attributes
+    ----------
+    limit : :class:`uprate.ratelimit.RateLimit`
+        The RateLimit to which this store is bound to.
+    """
     limit: RateLimit
 
     def setup(self, ratelimit: RateLimit):
@@ -42,6 +52,7 @@ class BaseStore(Protocol[T]):
 
         .. note::
             To get all the rates that this key follows use
+
             .. code-block:: python
 
                 self.limit.rates
@@ -96,6 +107,15 @@ class BaseStore(Protocol[T]):
         ...
 
 class MemoryStore(BaseStore[H]):
+    """An implementation of :class:`.BaseStore` protocol.
+    This implementation uses dictionaries and ejects stale buckets/keys
+    periodically only when :meth:`.MemoryStore.acquire` is called.
+
+    Attributes
+    ----------
+    limit : :class:`uprate.ratelimit.RateLimit`
+        The RateLimit to which this store is bound to.
+    """
     _data: dict[H, tuple[list[Union[int, float]], ...]]
 
     def __init__(self):
@@ -109,6 +129,8 @@ class MemoryStore(BaseStore[H]):
 
     async def acquire(self, key: H) -> tuple[bool, float, Optional[Rate]]:
         now = _now()
+        # Would using loop.call_at be a better idea?
+        # or per key scheduled callback maybe?
         self.verify_cache() # Evict stale keys
         record = self._data.get(key, None)
 
@@ -120,11 +142,16 @@ class MemoryStore(BaseStore[H]):
             worst: float = False
             worst_rate: Optional[Rate] = None
 
+            # Optimisations: We do not need to update every rate
+            # that expires only the ones that don't have usage tokens.
             for use_dt, rate in zip(record, self.limit.rates):
                 if use_dt[0] == 0:
                     if (then := (use_dt[1] + rate.period)) <= now:
+                        # We have no tokens left but the rate has expired
+                        # so we reset it and acquire a token.
                         use_dt[:] = [rate.uses - 1, now]
                     elif (retry := then - now) > worst:
+                        # no tokens and the rate has time left to expire.
                         worst = retry
                         worst_rate = rate
                 else:

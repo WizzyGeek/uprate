@@ -14,7 +14,7 @@
 
 <hr/>
 
-> Note: The project is still in planning
+> Note: The project is now in development
 
 # About
 
@@ -27,7 +27,7 @@ can be used in all stages of your app from prototyping to production! 🚀
 
 ## Why?
 
-There are two ways ratelimits are implemented in python
+There are two ways ratelimits are implemented in python for server-side
  - Make everything from scratch
  - Use a framework dependent ratelimit library.
 
@@ -36,6 +36,11 @@ Using a framework dependent ratelimit library is more feasible, but often
 these libraries don't provide features like external stores, multiple ratelimits
 and manual key specification. While there are some awesome ratelimit libraries for
 framwork X, not everyone uses framework X 😕.
+
+Ratelimits in client-sided coded also face similar problems. Often APIs enforce multiple
+ratelimits which are dynamic. Making a dynamic ratelimiter from scratch for your API wrapper
+or a small scale data collector takes up valuable dev time, which is why uprate aims to also 
+provide tools for client-sided code
 
 ## [Documentation](https://uprate.readthedocs.io/en/latest/)
 
@@ -64,8 +69,6 @@ import uprate
 And you are good to go! 🤘
 
 ## Example
-
-> This example is not fully implemented, yet.
 
 Here is a simple example that demonstrates Uprate's Awesomeness.
 

@@ -25,22 +25,22 @@ class SyncStore(Protocol[T]):
     limit: SyncRateLimit
 
     def setup(self, ratelimit: SyncRateLimit):
-        """Same as :method:`uprate.BaseStore.setup`"""
+        """Same as :meth:`uprate.store.BaseStore.setup`"""
         self.limit = ratelimit
 
     @abstractmethod
     def acquire(self, key: T) -> tuple[bool, float, Optional[Rate]]:
-        """Sync version of :abstractmethod:`uprate.BaseStore.acquire`"""
+        """Sync version of :meth:`uprate.store.BaseStore.acquire`"""
         ...
 
     @abstractmethod
     def reset(self, key: T) -> None:
-        """Sync version of :abstractmethod:`uprate.BaseStore.reset`"""
+        """Sync version of :meth:`uprate.store.BaseStore.reset`"""
         ...
 
     @abstractmethod
     def clear(self) -> None:
-        """Sync version of :abstractmethod:`uprate.BaseStore.clear`"""
+        """Sync version of :meth:`uprate.store.BaseStore.clear`"""
         ...
 
 class SyncMemoryStore(SyncStore[H]):
@@ -107,7 +107,7 @@ class SyncMemoryStore(SyncStore[H]):
 class SyncRateLimit(Generic[G]):
     """Enforces multiple rates per provided keys.
     This is a low-level sync component.
-    Sync version of :class:`uprate.RateLimit`
+    Sync version of :class:`uprate.ratelimit.RateLimit`
 
     Attributes
     ----------

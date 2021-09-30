@@ -12,10 +12,6 @@
     width: calc(50% - 27rem);
     border-right: none;
 
-    @media (prefers-color-scheme: dark) {
-        box-shadow: 4px 0px 16px #131819;
-    }
-
     @media (max-width: 67em) {
         box-shadow: none;
     }
@@ -24,10 +20,4 @@
 :root {
     --admonition-font-size: 0.9375rem;
     --code-font-size: 87.50%;
-
-    @media (prefers-color-scheme: dark) {
-        --color-api-keyword: #40ffff;
-        --color-background-primary: #0c0e11; //131416
-        --color-background-secondary: #020202;
-    }
 }

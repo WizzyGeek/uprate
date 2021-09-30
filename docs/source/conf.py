@@ -105,11 +105,13 @@ html_static_path = ['_static']
 
 html_logo = "_static/uprate_icon.png"
 
-# html_theme_options = {
-#     "logo": "uprate_icon.png",
-#     "logo_name": True,
-#     "logo_text_align": "center"
-# }
+html_theme_options = {
+    "dark_css_variables": {
+        "color-api-keyword": "#40ffff",
+        "color-background-primary": "#0c0e11",
+        "color-background-secondary": "#020202"
+    }
+}
 
 _up_static = Path(__file__).parent / "_static"
 

@@ -22,6 +22,8 @@ __all__ = (
 )
 
 Key = TypeVar("Key")
+"""An unbound and unconstrained TypeVar"""
+
 R = TypeVar("R", covariant=True)
 
 AnyRateLimit = Union[SyncRateLimit, RateLimit]
@@ -68,7 +70,7 @@ def on_retry_block(error: RateLimitError) -> None:
 def ratelimit(
     rate: Rate | RateGroup, *,
     key: Callable[..., Key] | Callable[..., Coroutine[Any, Any, Key]] | None = None,
-    on_retry: Callable[[RateLimitError], Any] | Callable[[RateLimitError], Coroutine[Any, Any, Any]] | None = None,
+    on_retry: Callable[[RateLimitError], Any] | Callable[[RateLimitError], Coroutine] | None = None,
     store: BaseStore | SyncStore | None = None
 ):
     """Limit a coroutine function or a callable to be called within
@@ -76,18 +78,18 @@ def ratelimit(
 
     Parameters
     ----------
-    rate : Union[Rate, RateGroup]
+    rate: :class:`~uprate.rate.Rate`, :class:`~uprate.rate.RateGroup`, (``Rate | RateGroup``)
         The rate that the decorated function must follow.
-    key : Optional[Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]]]
+    key : Callable[..., :data:`.Key`] | Callable[..., Coroutine[Any, Any, :data:`.Key`]] | :data:`None`
         The callback for generating a bucket for ratelimit from the arguments provided
         to the decorated function, this can be a coroutine function only when the decorated
         is a coroutine function as well. If :data:`None`, a default callback returning a string based on the
         decorated function's name is used, by default :data:`None`.
-    on_retry : Optional[Union[Callable[[:exc:`.RateLimitError`], Any], Callable[[:exc:`.RateLimitError`], Coroutine[Any, Any, Any]]]]
+    on_retry : Callable[[:exc:`.RateLimitError`], Any] | Callable[[:exc:`.RateLimitError`], Coroutine] | :data:`None`
         If provided then this function will be called when the function gets ratelimited
         and then the decorated function will be called again, if :data:`None` then function call isn't retried
         and :exc:`.RateLimitError` is raised, by default :data:`None`.
-    store : Optional[Union[:class:`.BaseStore`, :class:`.SyncStore`]]
+    store : :class:`.BaseStore` | :class:`.SyncStore` | :data:`None`
         The store to use for the rate limit, must be of type :class:`.BaseStore` if
         decorated function is a coroutine function else :class:`.SyncStore`.
         If :data:`None` then a suitable derived memory store is used, by default :data:`None`.

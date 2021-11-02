@@ -17,9 +17,9 @@ class RateLimitError(Exception):
 
     Attributes
     ----------
-    retry_after : float
+    retry_after : :class:`float`
         The amount of time to retry after in seconds.
-    rate : Rate
+    rate : :class:`~uprate.rate.Rate`
         The rate that was violated
     """
     retry_after: float

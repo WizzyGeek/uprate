@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from collections.abc import Hashable
 from time import monotonic as _now
-from typing import (TYPE_CHECKING, Optional, Protocol, TypeVar, Union,
+from typing import (TYPE_CHECKING, Optional, Protocol, TypeVar,
                     runtime_checkable)
 
 if TYPE_CHECKING:
@@ -16,7 +16,10 @@ __all__ = (
 )
 
 T = TypeVar("T", contravariant=True)
+"""An unbound and unconstrained contravariant TypeVar"""
+
 H = TypeVar("H", contravariant=True, bound=Hashable)
+"""A contravariant TypeVar bound to :class:`collections.abc.Hashable`"""
 
 @runtime_checkable
 class BaseStore(Protocol[T]):
@@ -36,12 +39,12 @@ class BaseStore(Protocol[T]):
         """Adds the ratelimit that this store is bound to as an
         attribute under :attr:`.BaseStore.limit`. This method exists
         only to create a circular reference between the store and ratelimit.
-        :attr:`uprate.RateLimit.rates` attribute allows the store to access
+        :attr:`uprate.ratelimit.RateLimit.rates` attribute allows the store to access
         all implemented rates.
 
         Parameters
         ----------
-        ratelimit : RateLimit
+        ratelimit : :class:`uprate.ratelimit.RateLimit`
             The ratelimit which this store is bound to.
         """
         self.limit = ratelimit
@@ -69,7 +72,7 @@ class BaseStore(Protocol[T]):
 
         Returns
         -------
-        tuple[:class:`bool`, :class:`float`, Optional[:class:`uprate.rate.Rate`]]
+        tuple[:class:`bool`, :class:`float`, :class:`~uprate.rate.Rate` | :data:`None`]
             A three element tuple, the first element of type :class:`bool` depicting success.
 
             Second element :class:`float` which is the amount of time to retry in, If a usage
@@ -99,29 +102,26 @@ class BaseStore(Protocol[T]):
     @abstractmethod
     async def clear(self) -> None:
         """Reset all the keys in the store.
-
-        Returns
-        -------
-        :data:`None`
         """
         ...
 
 class MemoryStore(BaseStore[H]):
     """An implementation of :class:`.BaseStore` protocol.
-    This implementation uses dictionaries and ejects stale buckets/keys
+    This implementation uses :class:`dict` and ejects stale buckets/keys
     periodically only when :meth:`.MemoryStore.acquire` is called.
+
+    This is a generic in TypeVar :data:`.H`
 
     Attributes
     ----------
     limit : :class:`uprate.ratelimit.RateLimit`
         The RateLimit to which this store is bound to.
     """
-    _data: dict[H, tuple[list[Union[int, float]], ...]]
+    _data: dict[H, tuple[list[int | float], ...]]
 
     def __init__(self):
         self._data = {}
         self._last_verified = 0.0
-        self.limit = 0
 
     def setup(self, ratelimit: RateLimit):
         super().setup(ratelimit)
@@ -170,10 +170,10 @@ class MemoryStore(BaseStore[H]):
     def verify_cache(self) -> None:
         # There is no way something has expired since the last
         # check if enough time hasn't passed.
-        if (_now() - self._last_verified) < self._max_period:
+        now = _now()
+        if (now - self._last_verified) < self._max_period:
             return
 
-        now = _now()
         delete = list[H]()
 
         for k, v in self._data.items():
@@ -182,3 +182,5 @@ class MemoryStore(BaseStore[H]):
 
         for i in delete:
             del self._data[i]
+
+        self._last_verified = _now()

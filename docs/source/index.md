@@ -12,8 +12,8 @@ then feel free to ask [questions here 😄](https://github.com/WizzyGeek/uprate/
 
 ## Quickstart
 
-Docs are currently in the making, unfortunately an API Reference is all we offer right now
-but that's devoid of all and any examples.
+Docs are currently in the making, a rich API Reference with some examples is
+all we offer right now.
 
 ## Example
 (index-example)=

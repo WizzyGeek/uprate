@@ -19,8 +19,6 @@ own store and publish it or to contribute it to uprate, we will gladly accept st
 
 Sync Store
 ----------
-While uprate is targetted at ASGI services, we also provide support for WSGI/syncronous paradigm based services.
-These are sync versions of the async components
 
 .. autoclass:: uprate._sync.SyncStore
     :members:

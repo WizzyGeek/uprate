@@ -8,17 +8,17 @@ from __future__ import annotations
 from abc import abstractmethod
 from operator import attrgetter
 from time import monotonic as _now
-from typing import (TYPE_CHECKING, Generic, Optional, Protocol, TypeVar, Union,
+from typing import (TYPE_CHECKING, Callable, Generic, Protocol, TypeVar, cast,
                     runtime_checkable)
 
 from .errors import RateLimitError
-from .rate import Rate, _RateGroup
-from .store import H, T
+from .rate import Rate, RateGroup
+from .store import H, MemoryStore, T
 
 G = TypeVar("G")
 
 if TYPE_CHECKING:
-    from .rate import Rate, _RateGroup
+    from .rate import Rate, RateGroup
 
 @runtime_checkable
 class SyncStore(Protocol[T]):
@@ -29,7 +29,7 @@ class SyncStore(Protocol[T]):
         self.limit = ratelimit
 
     @abstractmethod
-    def acquire(self, key: T) -> tuple[bool, float, Optional[Rate]]:
+    def acquire(self, key: T) -> tuple[bool, float, Rate | None]:
         """Sync version of :meth:`uprate.store.BaseStore.acquire`"""
         ...
 
@@ -44,7 +44,20 @@ class SyncStore(Protocol[T]):
         ...
 
 class SyncMemoryStore(SyncStore[H]):
-    _data: dict[H, tuple[list[Union[int, float]], ...]]
+    """An implementation of :class:`.SyncStore` protocol,
+    hence is also the sync version of :class:`~uprate.store.MemoryStore`
+
+    This implementation uses :class:`dict` and ejects stale buckets/keys
+    periodically only when :meth:`.SyncMemoryStore.acquire` is called.
+
+    This is a generic in TypeVar :data:`.H`
+
+    Attributes
+    ----------
+    limit : :class:`uprate.ratelimit.RateLimit`
+        The RateLimit to which this store is bound to.
+    """
+    _data: dict[H, tuple[list[int | float], ...]]
 
     def __init__(self):
         self._data = {}
@@ -55,7 +68,7 @@ class SyncMemoryStore(SyncStore[H]):
         super().setup(ratelimit)
         self._max_period = self.limit.rates[-1].period
 
-    def acquire(self, key: H) -> tuple[bool, float, Optional[Rate]]:
+    def acquire(self, key: H) -> tuple[bool, float, Rate | None]:
         now = _now()
         self.verify_cache() # Evict stale keys
         record = self._data.get(key, None)
@@ -66,7 +79,7 @@ class SyncMemoryStore(SyncStore[H]):
             return True, 0.0, None
         else:
             worst: float = False
-            worst_rate: Optional[Rate] = None
+            worst_rate: Rate | None = None
 
             for use_dt, rate in zip(record, self.limit.rates):
                 if use_dt[0] == 0:
@@ -88,44 +101,46 @@ class SyncMemoryStore(SyncStore[H]):
     def clear(self) -> None:
         self._data.clear()
 
-    def verify_cache(self) -> None:
-        # There is no way something has expired since the last
-        # check if enough time hasn't passed.
-        if (_now() - self._last_verified) < self._max_period:
-            return
-
-        now = _now()
-        delete = list[H]()
-
-        for k, v in self._data.items():
-            if self._max_period < (now - v[-1][1]):
-                delete.append(k)
-
-        for i in delete:
-            del self._data[i]
+    verify_cache = cast(Callable[[SyncStore[H]], None], MemoryStore.verify_cache)
 
 class SyncRateLimit(Generic[G]):
     """Enforces multiple rates per provided keys.
     This is a low-level sync component.
     Sync version of :class:`uprate.ratelimit.RateLimit`
 
+    Parameters
+    ----------
+    rate: :class:`~uprate.rate.Rate`, :class:`~uprate.rate.RateGroup`, (``Rate | RateGroup``)
+        The rate(s) to enforce on keys in this ratelimits.
+
+    store: :class:`.SyncStore`, (``SyncStore | None``)
+        The sync store to use for this SyncRateLimit, If None then a :class:`.SyncMemoryStore` is used.
+        By default, :data:`None`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        ``rate`` parameter provided to the constructor is of invalid type.
+
     Attributes
     ----------
     rates : tuple[:class:`uprate.rate.Rate`]
         A tuple of :class:`uprate.rate.Rate` sorted in ascending order by the rate's
         time period.
+    store : :class:`.SyncStore`
+        The sync store in use for this RateLimit.
     """
     rates: tuple[Rate, ...]
     store: SyncStore[G]
 
-    def __init__(self, rate: Union[Rate, _RateGroup], store: Optional[SyncStore[G]] = None) -> None:
+    def __init__(self, rate: Rate | RateGroup, store: SyncStore[G] | None = None) -> None:
         if isinstance(rate, Rate):
             self.rates = (rate,)
-        elif isinstance(rate, _RateGroup):
+        elif isinstance(rate, RateGroup):
             rate._data.sort(key=attrgetter("period"))
             self.rates = tuple(rate._data)
         else:
-            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate._RateGroup Instead got {type(rate)}")
+            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}")
 
         if store is None:
             self.store = SyncMemoryStore()
@@ -140,7 +155,7 @@ class SyncRateLimit(Generic[G]):
         res, retry, rate = self.store.acquire(key)
 
         if not res:
-            # <../ratelimit.py#81>
+            # <../ratelimit.py#82>
             raise RateLimitError(retry_after=retry, rate=rate) # type: ignore[arg-type]
 
     def reset(self, key: G = None) -> None:

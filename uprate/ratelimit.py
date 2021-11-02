@@ -6,7 +6,7 @@ from typing import Generic, Optional, TypeVar, Union
 from uprate.store import BaseStore, MemoryStore
 
 from .errors import RateLimitError
-from .rate import Rate, _RateGroup
+from .rate import Rate, RateGroup
 
 __all__ = (
     "RateLimit",
@@ -15,47 +15,43 @@ __all__ = (
 H = TypeVar("H")
 """A TypeVar"""
 
-
 class RateLimit(Generic[H]):
     """Enforces multiple rates per provided keys.
     This is a low-level component.
+
+    Parameters
+    ----------
+    rate: :class:`~uprate.rate.Rate`, :class:`~uprate.rate.RateGroup`, (``Rate | RateGroup``)
+        The rate(s) to enforce on keys in this ratelimits.
+
+    store: :class:`~uprate.store.BaseStore`, (``BaseStore | None``)
+        The store to use for this RateLimit, If None then a :class:`uprate.store.MemoryStore` is used.
+        By default, :data:`None`.
+
+    Raises
+    ------
+    :exc:`TypeError`
+        ``rate`` parameter provided to the constructor is of invalid type.
 
     Attributes
     ----------
     rates : tuple[:class:`uprate.rate.Rate`]
         A tuple of :class:`uprate.rate.Rate` sorted in ascending order by the rate's
         time period.
-
-    store: Optional[BaseStore]
-        The Store in use for this RateLimit.
+    store : :class:`~uprate.store.BaseStore`
+        The store in use for this RateLimit.
     """
     rates: tuple[Rate, ...]
     store: BaseStore[H]
 
-    def __init__(self, rate: Union[Rate, _RateGroup], store: Optional[BaseStore[H]] = None) -> None:
-        """Constructor for :class:`.RateLimit`
-
-        Parameters
-        ----------
-        rate: Union[:class:`uprate.rate.Rate`, :class:`uprate.rate._RateGroup`]
-            The rate(s) to enforce on keys in this ratelimits.
-
-        store: Optional[BaseStore]
-            The Store to use for this RateLimit, If None then a :class:`uprate.store.MemoryStore` is used.
-            By default, :data:`None`.
-
-        Raises
-        ------
-        :exc:`TypeError`
-            ``rate`` parameter provided to the constructor is of invalid type.
-        """
+    def __init__(self, rate: Union[Rate, RateGroup], store: Optional[BaseStore[H]] = None) -> None:
         if isinstance(rate, Rate):
             self.rates = (rate,)
-        elif isinstance(rate, _RateGroup):
+        elif isinstance(rate, RateGroup):
             rate._data.sort(key=attrgetter("period"))
             self.rates = tuple(rate._data)
         else:
-            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate._RateGroup Instead got {type(rate)}")
+            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}")
 
         if store is None:
             self.store = MemoryStore()
@@ -68,16 +64,17 @@ class RateLimit(Generic[H]):
 
     async def acquire(self, key: H) -> None:
         """Try to acquire a usage token for given token.
-        Raise an error if token can't be acquired
+        Raise an error if token can't be acquired.
 
         Parameters
         ----------
         key : :data:`.H`
             The key to acquire a usage token for.
 
-        Returns
-        -------
-        :data:`None`
+        Raises
+        ------
+        :exc:`~uprate.errors.RateLimitError`
+            Cannot acquire usage token due to exhaustion.
         """
         res, retry, rate = await self.store.acquire(key)
 
@@ -91,12 +88,8 @@ class RateLimit(Generic[H]):
 
         Parameters
         ----------
-        key : Optional[:data:`None`]
+        key : :data:`.H`, :data:`None`, (``H | None``)
             The key to reset ratelimit for. If :data:`None`, then resets all ratelimits, by default :data:`None`.
-
-        Returns
-        -------
-        :data:`None`
         """
         if not key:
             await self.store.clear()

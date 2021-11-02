@@ -12,7 +12,7 @@ __all__ = (
     "Months"
 )
 
-class _RateGroup:
+class RateGroup:
     __slots__ = ("_data",)
 
     _data: list[Rate]
@@ -20,7 +20,7 @@ class _RateGroup:
     def __init__(self):
         self._data = []
 
-    def __or__(self, other) -> _RateGroup:
+    def __or__(self, other) -> RateGroup:
         if isinstance(other, Rate):
             self._data.append(other)
             return self
@@ -63,11 +63,11 @@ class Rate:
     def __call__(self, magnitude: float) -> Rate:
         return self.__class__(self.uses, self.period * magnitude)
 
-    def __or__(self, other: Union[Rate, _RateGroup]) -> _RateGroup:
-        if isinstance(other, _RateGroup):
+    def __or__(self, other: Union[Rate, RateGroup]) -> RateGroup:
+        if isinstance(other, RateGroup):
             return other | self
         elif isinstance(other, self.__class__):
-            return _RateGroup() | self | other
+            return RateGroup() | self | other
         return NotImplemented
 
     __ror__ = __or__
@@ -98,7 +98,7 @@ class Rate:
 
     __radd__ = __add__
 
-    # object has other as object / Liskov Principle
+    # object has other as object
 
     def __eq__(self, other) -> bool:
         if isinstance(other, self.__class__):
@@ -129,7 +129,7 @@ Example
     assert 2 / Seconds(3) == 2 / (3 * Seconds)
     ...
     # 30 uses per 2 min 30 sec but also 2 uses per 2 seconds
-    api_rate: uprate.rate._RateGroup = 2/Seconds(2) | 30/(2 * Minutes + 30 * seconds)
+    api_rate: uprate.rate.RateGroup = 2/Seconds(2) | 30/(2 * Minutes + 30 * Seconds)
 
 """
 

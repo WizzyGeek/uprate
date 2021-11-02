@@ -4,7 +4,7 @@ from asyncio import iscoroutinefunction, sleep
 from collections.abc import Coroutine
 from functools import wraps
 from time import sleep as block
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, Union, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, Union, cast
 
 from ._sync import SyncRateLimit, SyncStore
 from ._utils import maybe_awaitable
@@ -13,7 +13,7 @@ from .ratelimit import RateLimit
 from .store import BaseStore
 
 if TYPE_CHECKING:
-    from .rate import Rate, _RateGroup
+    from .rate import Rate, RateGroup
 
 __all__ = (
     "on_retry_sleep",
@@ -66,17 +66,17 @@ def on_retry_block(error: RateLimitError) -> None:
 
 # TODO: Complete Docs
 def ratelimit(
-    rate: Union[Rate, _RateGroup], *,
-    key: Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]] = None,
-    on_retry: Union[Callable[[RateLimitError], Any], Callable[[RateLimitError], Coroutine[Any, Any, Any]]] = None,
-    store: Union[BaseStore, SyncStore] = None
+    rate: Rate | RateGroup, *,
+    key: Callable[..., Key] | Callable[..., Coroutine[Any, Any, Key]] | None = None,
+    on_retry: Callable[[RateLimitError], Any] | Callable[[RateLimitError], Coroutine[Any, Any, Any]] | None = None,
+    store: BaseStore | SyncStore | None = None
 ):
     """Limit a coroutine function or a callable to be called within
     provided rate. :ref:`Example here <index-example>`
 
     Parameters
     ----------
-    rate : Union[Rate, _RateGroup]
+    rate : Union[Rate, RateGroup]
         The rate that the decorated function must follow.
     key : Optional[Union[Callable[..., Key], Callable[..., Coroutine[Any, Any, Key]]]]
         The callback for generating a bucket for ratelimit from the arguments provided

@@ -14,8 +14,6 @@
 
 <hr/>
 
-> Note: The project is now in development
-
 # About
 
 Uprate is a robust, simple ratelimit library.<br/>
@@ -43,8 +41,6 @@ or a small scale data collector takes up valuable dev time, which is why uprate 
 provide tools for client-sided code
 
 ## [Documentation](https://uprate.readthedocs.io/en/latest/)
-
-> The documentation is currently in development! Please stay tuned!
 
 The documentation can be found at <https://uprate.readthedocs.io/en/latest/> <br/>
 

@@ -12,4 +12,5 @@ ratelimit.rst
 store.rst
 decorators.rst
 errors.rst
+bucket.rst
 ```

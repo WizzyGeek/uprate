@@ -4,6 +4,7 @@ from .decorators import *
 from .store import *
 from ._sync import *
 from .errors import *
+from .bucket import *
 
 from importlib.metadata import version
 

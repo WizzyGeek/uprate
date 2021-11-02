@@ -36,9 +36,9 @@ and manual key specification. While there are some awesome ratelimit libraries f
 framwork X, not everyone uses framework X 😕.
 
 Ratelimits in client-sided coded also face similar problems. Often APIs enforce multiple
-ratelimits which are dynamic. Making a dynamic ratelimiter from scratch for your API wrapper
+ratelimits. Making a ratelimiter from scratch for your API wrapper
 or a small scale data collector takes up valuable dev time, which is why uprate aims to also
-provide tools for client-sided code
+provide tools for client-sided code.
 
 ## [Documentation](https://uprate.readthedocs.io/en/latest/)
 

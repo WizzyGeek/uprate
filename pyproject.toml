@@ -7,7 +7,7 @@ authors = ["WizzyGeek <ojasscoding@gmail.com>"]
 license = "MIT"
 keywords = ["ratelimits", "limits", "ratelimit"]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
@@ -20,6 +20,7 @@ documentation = "https://uprate.readthedocs.io/en/latest/"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/WizzyGeek/uprate/issues"
+"Discord" = "https://discord.gg/udmdsFk6Yx"
 
 [tool.poetry.dependencies]
 python = "^3.9"

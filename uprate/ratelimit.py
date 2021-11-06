@@ -35,8 +35,8 @@ class RateLimit(Generic[H]):
 
     Attributes
     ----------
-    rates : tuple[:class:`uprate.rate.Rate`]
-        A tuple of :class:`uprate.rate.Rate` sorted in ascending order by the rate's
+    rates : tuple[:class:`~uprate.rate.Rate`]
+        A tuple of :class:`~uprate.rate.Rate` sorted in ascending order by the rate's
         time period.
     store : :class:`~uprate.store.BaseStore`
         The store in use for this RateLimit.

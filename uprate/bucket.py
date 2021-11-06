@@ -4,11 +4,12 @@ import asyncio
 from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 
 from .errors import RateLimitError
-from .rate import Rate, RateGroup
 from .ratelimit import RateLimit
-from .store import BaseStore
 
 if TYPE_CHECKING:
+    from .store import BaseStore
+    from .rate import Rate, RateGroup
+
     from types import TracebackType
 
 __all__ = (
@@ -133,3 +134,23 @@ class Bucket(Generic[T]):
                 ...
         """
         return BucketCM(self, key)
+
+    async def reset(self, key: T = None) -> None:
+        """Reset the given key.
+
+        Parameters
+        ----------
+        key : :data:`.T`, :data:`None`, (``T | None``)
+            The key to reset ratelimit for. If :data:`None`, then resets all ratelimits, by default :data:`None`.
+        """
+        self._limit.reset()
+
+    @property
+    def rates(self) -> tuple[Rate, ...]:
+        """tuple[:class:`~uprate.rate.Rate`] : Same as :attr:`.RateLimit.rates`"""
+        return self._limit.rates
+
+    @property
+    def store(self) -> BaseStore:
+        """:class:`~uprate.store.BaseStore` : Same as :attr:`.RateLimit.store`"""
+        return self._limit.store

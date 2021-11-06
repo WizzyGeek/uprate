@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "uprate"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
 authors = ["WizzyGeek <ojasscoding@gmail.com>"]
 license = "MIT"
@@ -34,7 +34,6 @@ docs = ["Sphinx", "myst-parser", "furo", "sphinx-copybutton"]
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
-pytest = "^6.2.4"
 
 [tool.mypy]
 show_error_codes = true

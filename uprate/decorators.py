@@ -138,10 +138,11 @@ def ratelimit(
                         if on_retry is None:
                             raise err from None
                         else:
-                            on_retry()
+                            on_retry(err)
                     else:
                         return func()
 
         return _apply_attrs(rated, limit=limit)
 
     return decorator
+

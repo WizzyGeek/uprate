@@ -15,6 +15,12 @@ from .errors import RateLimitError
 from .rate import Rate, RateGroup
 from .store import H, MemoryStore, T
 
+__all__ = (
+    "SyncStore",
+    "SyncMemoryStore",
+    "SyncRateLimit"
+)
+
 G = TypeVar("G")
 
 if TYPE_CHECKING:

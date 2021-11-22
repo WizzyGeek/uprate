@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "uprate"
-version = "0.2.0"
+version = "0.2.1"
 description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
 authors = ["WizzyGeek <ojasscoding@gmail.com>"]
 license = "MIT"

@@ -6,7 +6,7 @@ from typing import Awaitable, TypeVar, Union
 R = TypeVar("R")
 
 __all__ = (
-    "maybe_awaitable"
+    "maybe_awaitable",
 )
 
 async def maybe_awaitable(ret: Union[R, Awaitable[R]]) -> R:

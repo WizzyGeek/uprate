@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from time import time as now
 
 if TYPE_CHECKING:
     from .rate import Rate
@@ -17,17 +18,22 @@ class RateLimitError(Exception):
 
     Attributes
     ----------
-    retry_after : :class:`float`
-        The amount of time to retry after in seconds.
+    retry_at : :class:`float`
+        The unix timestamp of when to retry.
     rate : :class:`~uprate.rate.Rate`
         The rate that was violated
     """
-    retry_after: float
+    retry_at: float
     rate: Rate
 
-    def __init__(self, retry_after: float, rate: Rate, *args):
+    @property
+    def retry_after(self) -> float:
+        """:class:`float` : The amount of time to retry after in seconds, might be negative if enough time has elapsed"""
+        return self.retry_at - now()
+
+    def __init__(self, retry_at: float, rate: Rate, *args):
         super().__init__(*args)
-        self.retry_after = retry_after
+        self.retry_at = retry_at
         self.rate = rate
 
     def __float__(self) -> float:

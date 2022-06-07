@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from operator import attrgetter
+from time import time as unix
 from typing import Generic, Optional, TypeVar, Union
 
 from uprate.store import BaseStore, MemoryStore
@@ -81,7 +82,7 @@ class RateLimit(Generic[H]):
         if not res:
             # cast is ugly, overloads don't work (parameters don't change)
             # TODO: https://www.python.org/dev/peps/pep-0647/
-            raise RateLimitError(retry_after=retry, rate=rate) # type: ignore[arg-type]
+            raise RateLimitError(retry_at=retry + unix(), rate=rate) # type: ignore[arg-type]
 
     async def reset(self, key: H = None) -> None:
         """Reset the given key.

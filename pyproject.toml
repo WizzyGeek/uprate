@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "uprate"
-version = "0.2.1"
+version = "0.3"
 description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
 authors = ["WizzyGeek <ojasscoding@gmail.com>"]
 license = "MIT"
@@ -42,7 +42,7 @@ warn_unused_ignores = true
 warn_unused_configs = true
 files = ["uprate", "tests"]
 exclude = "docs/"
-python_version = "3.9"
+python_version = "3.10"
 
 [tool.pyright]
 include = ["uprate"]

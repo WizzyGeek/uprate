@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from operator import attrgetter
-from time import monotonic as _now
+from time import monotonic as _now, time as unix
 from typing import (TYPE_CHECKING, Callable, Generic, Protocol, TypeVar, cast,
                     runtime_checkable)
 
@@ -68,7 +68,6 @@ class SyncMemoryStore(SyncStore[H]):
     def __init__(self):
         self._data = {}
         self._last_verified = 0.0
-        self.limit = 0
 
     def setup(self, ratelimit: SyncRateLimit):
         super().setup(ratelimit)
@@ -162,10 +161,10 @@ class SyncRateLimit(Generic[G]):
 
         if not res:
             # <../ratelimit.py#82>
-            raise RateLimitError(retry_after=retry, rate=rate) # type: ignore[arg-type]
+            raise RateLimitError(retry_at=retry + unix(), rate=rate) # type: ignore[arg-type]
 
     def reset(self, key: G = None) -> None:
-        if not key:
+        if key is None:
             self.store.clear()
         else:
             self.store.reset(key)

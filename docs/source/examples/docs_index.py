@@ -2,7 +2,7 @@ import uprate as up
 
 @up.ratelimit(1 / (up.Seconds(2) + up.Minutes(1)))
 def oppressed():
-    print("Hello World. I can only speank once every 62 seconds :(")
+    print("Hello World. I can only speak once every 62 seconds :(")
 
 oppressed()
 

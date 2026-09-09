@@ -11,6 +11,8 @@ from time import monotonic as _now, time as unix
 from typing import (TYPE_CHECKING, Callable, Generic, Protocol, TypeVar, cast,
                     runtime_checkable)
 
+from uprate._utils import monotonic_to_unix
+
 from .errors import RateLimitError
 from .rate import Rate, RateGroup
 from .store import H, MemoryStore, T
@@ -58,6 +60,10 @@ class SyncMemoryStore(SyncStore[H]):
 
     This is a generic in TypeVar :data:`.H`
 
+    Importantly this uses strong references to keys
+    and the Algorithmic implmentation is Fixed window counter
+    which can allow for 2x Burst requests.
+
     Attributes
     ----------
     limit : :class:`uprate.ratelimit.RateLimit`
@@ -75,30 +81,34 @@ class SyncMemoryStore(SyncStore[H]):
 
     def acquire(self, key: H) -> tuple[bool, float, Rate | None]:
         now = _now()
-        self.verify_cache() # Evict stale keys
+        # TODO: Launch a singleton uprate daemon, thread or task
+        # and submit this job
+        self.verify_cache()
         record = self._data.get(key, None)
 
         if record is None:
             # 1st insert
             self._data[key] = tuple([i.uses - 1, now] for i in self.limit.rates)
             return True, 0.0, None
-        else:
-            worst: float = False
-            worst_rate: Rate | None = None
 
-            for use_dt, rate in zip(record, self.limit.rates):
-                if use_dt[0] == 0:
-                    if (then := (use_dt[1] + rate.period)) <= now:
-                        use_dt[:] = [rate.uses - 1, now]
-                    elif (retry := then - now) > worst:
-                        worst = retry
-                        worst_rate = rate
-                else:
-                    use_dt[0] -= 1
-            if worst is False:
-                return True, 0.0, None
+        worst: float = False
+        worst_rate: Rate | None = None
 
-            return False, worst, worst_rate
+        for use_dt, rate in zip(record, self.limit.rates):
+            if use_dt[0] == 0 and (then := (use_dt[1] + rate.period)) > now:
+                worst = max(worst, then)
+                worst_rate = rate
+
+        if worst is not False:
+            return False, monotonic_to_unix(worst), worst_rate
+
+        for use_dt, rate in zip(record, self.limit.rates):
+            if use_dt[0] == 0:
+                use_dt[:] = [rate.uses - 1, now]
+            else:
+                use_dt[0] -= 1
+
+        return True, 0.0, None
 
     def reset(self, key: H) -> None:
         del self._data[key]

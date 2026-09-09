@@ -6,6 +6,8 @@ from time import monotonic as _now
 from typing import (TYPE_CHECKING, Optional, Protocol, TypeVar,
                     runtime_checkable)
 
+from uprate._utils import monotonic_to_unix
+
 if TYPE_CHECKING:
     from .rate import Rate
     from .ratelimit import RateLimit
@@ -62,7 +64,7 @@ class BaseStore(Protocol[T]):
 
         .. note::
             If a HashMap like data-structure is being nested, then it's best that it is nested by
-            the rates instead of the keys, since the number of keys may not exceed 1 in most cases,
+            the rates first instead of the keys, since the number of keys may not exceed 1 in most cases,
             while the number of keys could grow upto 100k or more fairly quickly.
 
         Parameters
@@ -75,11 +77,11 @@ class BaseStore(Protocol[T]):
         tuple[:class:`bool`, :class:`float`, :class:`~uprate.rate.Rate` | :data:`None`]
             A three element tuple, the first element of type :class:`bool` depicting success.
 
-            Second element :class:`float` which is the amount of time to retry in, If a usage
-            token was acquired this should return ``0`` other-wise the time in which a
-            usage token will be available. If the store does not support retry time then it
+            Second element :class:`float` which is the unix timestamp to retry at, If a usage
+            token was acquired this should return ``0`` other-wise the unix timestamp at which a
+            usage token will be available. If the store does not support retry unix timestamp then it
             should return a negative value like ``-1`` (negative values shall be returned only on
-            failure if the retry time cannot be determined).
+            failure if the retry timestamp cannot be determined).
 
             The last element is the :class:`uprate.rate.Rate` object which was violated,
             this must be the rate which will take the longest to reset. The last element is
@@ -129,37 +131,34 @@ class MemoryStore(BaseStore[H]):
 
     async def acquire(self, key: H) -> tuple[bool, float, Optional[Rate]]:
         now = _now()
-        # Would using loop.call_at be a better idea?
-        # or per key scheduled callback maybe?
-        self.verify_cache() # Evict stale keys
+        # TODO: Launch a singleton uprate daemon, thread or task
+        # and submit this job
+        self.verify_cache()
         record = self._data.get(key, None)
 
         if record is None:
             # 1st insert
             self._data[key] = tuple([i.uses - 1, now] for i in self.limit.rates)
             return True, 0.0, None
-        else:
-            worst: float = False
-            worst_rate: Optional[Rate] = None
 
-            # Optimisations: We do not need to update every rate
-            # that expires only the ones that don't have usage tokens.
-            for use_dt, rate in zip(record, self.limit.rates):
-                if use_dt[0] == 0:
-                    if (then := (use_dt[1] + rate.period)) <= now:
-                        # We have no tokens left but the rate has expired
-                        # so we reset it and acquire a token.
-                        use_dt[:] = [rate.uses - 1, now]
-                    elif (retry := then - now) > worst:
-                        # no tokens and the rate has time left to expire.
-                        worst = retry
-                        worst_rate = rate
-                else:
-                    use_dt[0] -= 1
-            if worst is False:
-                return True, 0.0, None
+        worst: float = False
+        worst_rate: Optional[Rate] = None
 
-            return False, worst, worst_rate
+        for use_dt, rate in zip(record, self.limit.rates):
+            if use_dt[0] == 0 and (then := (use_dt[1] + rate.period)) > now:
+                worst = max(worst, then)
+                worst_rate = rate
+
+        if worst is not False:
+            return False, monotonic_to_unix(worst), worst_rate
+
+        for use_dt, rate in zip(record, self.limit.rates):
+            if use_dt[0] == 0:
+                use_dt[:] = [rate.uses - 1, now]
+            else:
+                use_dt[0] -= 1
+
+        return True, 0.0, None
 
     async def reset(self, key: H) -> None:
         del self._data[key]

@@ -60,6 +60,10 @@ class SyncMemoryStore(SyncStore[H]):
 
     This is a generic in TypeVar :data:`.H`
 
+    Importantly this uses strong references to keys
+    and the Algorithmic implmentation is Fixed window counter
+    which can allow for 2x Burst requests.
+
     Attributes
     ----------
     limit : :class:`uprate.ratelimit.RateLimit`

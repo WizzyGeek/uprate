@@ -62,5 +62,5 @@ python_version = "3.10"
 
 [tool.pyright]
 include = ["uprate"]
-exclude = ["docs", ".git", "**/__pycache__", ".mypy_cache"]
+exclude = ["docs", ".git", "**/__pycache__", ".mypy_cache", "**/node_modules", "**/.*", ".venv"]
 ignore = [".venv"]

@@ -242,3 +242,6 @@ $RECYCLE.BIN/
 
 # Dev compiled css files
 docs/source/_static/*.css*
+
+
+.venv*/

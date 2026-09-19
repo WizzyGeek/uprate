@@ -3,7 +3,7 @@ name = "uprate"
 version = "0.3"
 description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
 authors = [{ name = "WizzyGeek", email = "ojasscoding@gmail.com" }]
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 readme = "README.md"
 license = "MIT"
 keywords = [
@@ -16,7 +16,6 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -25,12 +24,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-docs = [
-    "Sphinx>=4.1.1,<5",
-    "myst-parser>=0.15.1,<0.16",
-    "furo>=2021.7.5b38,<2022",
-    "sphinx-copybutton>=0.4.0,<0.5",
-]
+
 
 [project.urls]
 Homepage = "https://github.com/WizzyGeek/uprate#readme"
@@ -40,9 +34,22 @@ Documentation = "https://uprate.readthedocs.io/en/latest/"
 Discord = "https://discord.gg/udmdsFk6Yx"
 
 [dependency-groups]
-dev = ["mypy>=0.910,<0.911"]
+dev = [
+    "mypy>=2.3.1",
+]
+docs = [
+    "furo>=2025.12.19",
+    "myst-parser>=5.1.0",
+    "sphinx>=9",
+    "sphinx-copybutton>=0.5.2",
+]
 
 [tool.uv]
+
+[tool.uv.dependency-groups]
+# Tell uv that this specific group targets Python 3.11+
+docs = { requires-python = ">=3.11" }
+dev = { requires-python = ">=3.10" }
 
 [tool.uv.build-backend]
 module-root = ""
@@ -56,7 +63,7 @@ show_error_codes = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unused_configs = true
-files = ["uprate", "tests"]
+files = ["uprate"]
 exclude = "docs/"
 python_version = "3.10"
 

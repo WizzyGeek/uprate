@@ -11,9 +11,9 @@ __all__ = (
     "monotonic_to_unix",
 )
 
-MAX_SAMPLE_DURATION_NS = 2500
-GLOBAL_UNIX_MONO_DELTA_NS = 0
-MAX_UNIX_MONO_DRIFT_NS = 50000
+MAX_SAMPLE_DURATION_NS: int = 2500
+GLOBAL_UNIX_MONO_DELTA_NS: int = 0
+MAX_UNIX_MONO_DRIFT_NS: int = 50000
 Clock = Callable[[], int]
 
 
@@ -32,9 +32,11 @@ def monotonic_to_unix_ns(time_nano: int) -> int:
     """Converts a monotonic timestamp in nanoseconds to unix timestamp in nanoseconds"""
     return time_nano + get_unix_monotonic_delta()
 
-def get_unix_monotonic_delta():
+def get_unix_monotonic_delta() -> int:
     global GLOBAL_UNIX_MONO_DELTA_NS
-    now_delta = time_ns() - monotonic_ns()
+    m1 = monotonic_ns()
+    u1 = time_ns()
+    now_delta = u1 - m1
 
     if abs(now_delta - GLOBAL_UNIX_MONO_DELTA_NS) >= MAX_UNIX_MONO_DRIFT_NS:
         delta, cacheable = _find_clock_delta(time_ns, monotonic_ns)

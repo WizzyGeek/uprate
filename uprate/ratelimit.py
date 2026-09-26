@@ -91,7 +91,7 @@ class RateLimit(Generic[H]):
             # TODO: https://www.python.org/dev/peps/pep-0647/
             raise RateLimitError(retry_at=retry + unix(), rate=rate)  # type: ignore[arg-type]
 
-    async def reset(self, key: H = None) -> None:
+    async def reset(self, key: H | None = None) -> None:
         """Reset the given key.
 
         Parameters
@@ -99,7 +99,7 @@ class RateLimit(Generic[H]):
         key : :data:`.H`, :data:`None`, (``H | None``)
             The key to reset ratelimit for. If :data:`None`, then resets all ratelimits, by default :data:`None`.
         """
-        if not key:
+        if key is None:
             await self.store.clear()
         else:
             await self.store.reset(key)

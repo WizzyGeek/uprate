@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from asyncio import iscoroutinefunction, sleep
+from asyncio import sleep
+from inspect import iscoroutinefunction
 from collections.abc import Coroutine
 from functools import wraps
 from time import sleep as block

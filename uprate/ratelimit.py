@@ -86,10 +86,8 @@ class RateLimit(Generic[H]):
         """
         res, retry, rate = await self.store.acquire(key)
 
-        if not res:
-            # cast is ugly, overloads don't work (parameters don't change)
-            # TODO: https://www.python.org/dev/peps/pep-0647/
-            raise RateLimitError(retry_at=retry + unix(), rate=rate)  # type: ignore[arg-type]
+        if not res and rate is not None:
+            raise RateLimitError(retry_at=retry + unix(), rate=rate)
 
     async def reset(self, key: H | None = None) -> None:
         """Reset the given key.

@@ -139,7 +139,7 @@ class Bucket(Generic[T]):
         """
         return BucketCM(self, key)
 
-    async def reset(self, key: T = None) -> None:
+    async def reset(self, key: T | None = None) -> None:
         """Reset the given key.
 
         Parameters
@@ -147,7 +147,7 @@ class Bucket(Generic[T]):
         key : :data:`.T`, :data:`None`, (``T | None``)
             The key to reset ratelimit for. If :data:`None`, then resets all ratelimits, by default :data:`None`.
         """
-        self._limit.reset()
+        await self._limit.reset(key)
 
     @property
     def rates(self) -> tuple[Rate, ...]:

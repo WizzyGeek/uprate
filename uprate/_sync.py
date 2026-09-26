@@ -12,6 +12,7 @@ from typing import (
     TYPE_CHECKING,
     Callable,
     Generic,
+    Literal,
     Protocol,
     TypeVar,
     cast,
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class SyncStore(Protocol[T]):
     limit: SyncRateLimit
+    is_sync: Literal[True] = True
 
     def setup(self, ratelimit: SyncRateLimit):
         """Same as :meth:`uprate.store.BaseStore.setup`"""
@@ -184,11 +186,10 @@ class SyncRateLimit(Generic[G]):
     def acquire(self, key: G) -> None:
         res, retry, rate = self.store.acquire(key)
 
-        if not res:
-            # <../ratelimit.py#82>
-            raise RateLimitError(retry_at=retry + unix(), rate=rate)  # type: ignore[arg-type]
+        if not res and rate is not None:
+            raise RateLimitError(retry_at=retry + unix(), rate=rate)
 
-    def reset(self, key: G = None) -> None:
+    def reset(self, key: G | None = None) -> None:
         if key is None:
             self.store.clear()
         else:

@@ -3,8 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from collections.abc import Hashable
 from time import monotonic as _now
-from typing import (TYPE_CHECKING, Optional, Protocol, TypeVar,
-                    runtime_checkable)
+from typing import TYPE_CHECKING, Optional, Protocol, TypeVar, runtime_checkable
 
 from uprate._utils import monotonic_to_unix
 
@@ -12,16 +11,14 @@ if TYPE_CHECKING:
     from .rate import Rate
     from .ratelimit import RateLimit
 
-__all__ = (
-    "BaseStore",
-    "MemoryStore"
-)
+__all__ = ("BaseStore", "MemoryStore")
 
 T = TypeVar("T", contravariant=True)
 """An unbound and unconstrained contravariant TypeVar"""
 
 H = TypeVar("H", contravariant=True, bound=Hashable)
 """A contravariant TypeVar bound to :class:`collections.abc.Hashable`"""
+
 
 @runtime_checkable
 class BaseStore(Protocol[T]):
@@ -35,6 +32,7 @@ class BaseStore(Protocol[T]):
     limit : :class:`uprate.ratelimit.RateLimit`
         The RateLimit to which this store is bound to.
     """
+
     limit: RateLimit
 
     def setup(self, ratelimit: RateLimit):
@@ -103,9 +101,9 @@ class BaseStore(Protocol[T]):
 
     @abstractmethod
     async def clear(self) -> None:
-        """Reset all the keys in the store.
-        """
+        """Reset all the keys in the store."""
         ...
+
 
 class MemoryStore(BaseStore[H]):
     """An implementation of :class:`.BaseStore` protocol.
@@ -123,6 +121,7 @@ class MemoryStore(BaseStore[H]):
     limit : :class:`uprate.ratelimit.RateLimit`
         The RateLimit to which this store is bound to.
     """
+
     _data: dict[H, tuple[list[int | float], ...]]
 
     def __init__(self):

@@ -8,8 +8,15 @@ from __future__ import annotations
 from abc import abstractmethod
 from operator import attrgetter
 from time import monotonic as _now, time as unix
-from typing import (TYPE_CHECKING, Callable, Generic, Protocol, TypeVar, cast,
-                    runtime_checkable)
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Generic,
+    Protocol,
+    TypeVar,
+    cast,
+    runtime_checkable,
+)
 
 from uprate._utils import monotonic_to_unix
 
@@ -17,16 +24,13 @@ from .errors import RateLimitError
 from .rate import Rate, RateGroup
 from .store import H, MemoryStore, T
 
-__all__ = (
-    "SyncStore",
-    "SyncMemoryStore",
-    "SyncRateLimit"
-)
+__all__ = ("SyncStore", "SyncMemoryStore", "SyncRateLimit")
 
 G = TypeVar("G")
 
 if TYPE_CHECKING:
     from .rate import Rate, RateGroup
+
 
 @runtime_checkable
 class SyncStore(Protocol[T]):
@@ -51,6 +55,7 @@ class SyncStore(Protocol[T]):
         """Sync version of :meth:`uprate.store.BaseStore.clear`"""
         ...
 
+
 class SyncMemoryStore(SyncStore[H]):
     """An implementation of :class:`.SyncStore` protocol,
     hence is also the sync version of :class:`~uprate.store.MemoryStore`
@@ -69,6 +74,7 @@ class SyncMemoryStore(SyncStore[H]):
     limit : :class:`uprate.ratelimit.RateLimit`
         The RateLimit to which this store is bound to.
     """
+
     _data: dict[H, tuple[list[int | float], ...]]
 
     def __init__(self):
@@ -118,6 +124,7 @@ class SyncMemoryStore(SyncStore[H]):
 
     verify_cache = cast(Callable[[SyncStore[H]], None], MemoryStore.verify_cache)
 
+
 class SyncRateLimit(Generic[G]):
     """Enforces multiple rates per provided keys.
     This is a low-level sync component.
@@ -145,24 +152,32 @@ class SyncRateLimit(Generic[G]):
     store : :class:`.SyncStore`
         The sync store in use for this RateLimit.
     """
+
     rates: tuple[Rate, ...]
     store: SyncStore[G]
 
-    def __init__(self, rate: Rate | RateGroup, store: SyncStore[G] | None = None) -> None:
+    def __init__(
+        self, rate: Rate | RateGroup, store: SyncStore[G] | None = None
+    ) -> None:
         if isinstance(rate, Rate):
             self.rates = (rate,)
         elif isinstance(rate, RateGroup):
             rate._data.sort(key=attrgetter("period"))
             self.rates = tuple(rate._data)
         else:
-            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}")
+            raise TypeError(
+                f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}"
+            )
 
         if store is None:
             self.store = SyncMemoryStore()
         elif isinstance(store, SyncStore):
             self.store = store
         else:
-            raise TypeError("Expected a type deriving from uprate.store.SyncStore instead got " + str(type(store)))
+            raise TypeError(
+                "Expected a type deriving from uprate.store.SyncStore instead got "
+                + str(type(store))
+            )
 
         self.store.setup(self)
 
@@ -171,7 +186,7 @@ class SyncRateLimit(Generic[G]):
 
         if not res:
             # <../ratelimit.py#82>
-            raise RateLimitError(retry_at=retry + unix(), rate=rate) # type: ignore[arg-type]
+            raise RateLimitError(retry_at=retry + unix(), rate=rate)  # type: ignore[arg-type]
 
     def reset(self, key: G = None) -> None:
         if key is None:

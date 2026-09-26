@@ -1,5 +1,4 @@
-"""Contains all Exception(s) uprate raises
-"""
+"""Contains all Exception(s) uprate raises"""
 
 from __future__ import annotations
 
@@ -9,9 +8,8 @@ from time import time as now
 if TYPE_CHECKING:
     from .rate import Rate
 
-__all__ = (
-    "RateLimitError",
-)
+__all__ = ("RateLimitError",)
+
 
 class RateLimitError(Exception):
     """Raised when a Rate Limit is violated.
@@ -23,6 +21,7 @@ class RateLimitError(Exception):
     rate : :class:`~uprate.rate.Rate`
         The rate that was violated
     """
+
     retry_at: float
     rate: Rate
 

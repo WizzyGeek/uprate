@@ -2,15 +2,8 @@ from __future__ import annotations
 
 from typing import Union
 
-__all__ = (
-    "Rate",
-    "Seconds",
-    "Minutes",
-    "Hours",
-    "Days",
-    "Weeks",
-    "Months"
-)
+__all__ = ("Rate", "Seconds", "Minutes", "Hours", "Days", "Weeks", "Months")
+
 
 class RateGroup:
     __slots__ = ("_data",)
@@ -51,6 +44,7 @@ class Rate:
     period: float
         The time period of the rate in seconds
     """
+
     __slots__ = ("uses", "period")
 
     uses: int
@@ -92,7 +86,9 @@ class Rate:
     def __add__(self, other: Rate) -> Rate:
         if isinstance(other, self.__class__):
             if other.uses != 1 or self.uses != 1:
-                raise ValueError("Cannot 'add' two rates which have uses other than one")
+                raise ValueError(
+                    "Cannot 'add' two rates which have uses other than one"
+                )
             return self.__class__(1, self.period + other.period)
         return NotImplemented
 

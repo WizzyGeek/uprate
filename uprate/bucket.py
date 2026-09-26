@@ -12,11 +12,10 @@ if TYPE_CHECKING:
 
     from types import TracebackType
 
-__all__ = (
-    "Bucket",
-)
+__all__ = ("Bucket",)
 
 T = TypeVar("T")
+
 
 class BucketCM(Generic[T]):
     key: T
@@ -33,10 +32,12 @@ class BucketCM(Generic[T]):
         await self.__wait()
         return None
 
-    async def __aexit__(self,
-                        exc_type: type[BaseException] | None,
-                        exc: BaseException | None,
-                        tb: TracebackType | None) -> Literal[False]:
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> Literal[False]:
         if self.bucket._queue:
             self.bucket._queue.put_nowait(None)
 
@@ -50,6 +51,7 @@ class BucketCM(Generic[T]):
                 await asyncio.sleep(float(err))
             else:
                 return None
+
 
 class Bucket(Generic[T]):
     """A high level ratelimit construct to obey both
@@ -76,7 +78,9 @@ class Bucket(Generic[T]):
     _limit: RateLimit[T]
     _queue: asyncio.Queue | None
 
-    def __init__(self, rate: Rate | RateGroup, store: BaseStore[T] = None, concurrency: int = 0) -> None:
+    def __init__(
+        self, rate: Rate | RateGroup, store: BaseStore[T] = None, concurrency: int = 0
+    ) -> None:
         self._limit = RateLimit(rate, store)
 
         if concurrency > 0:

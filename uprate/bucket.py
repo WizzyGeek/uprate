@@ -79,7 +79,10 @@ class Bucket(Generic[T]):
     _queue: asyncio.Queue | None
 
     def __init__(
-        self, rate: Rate | RateGroup, store: BaseStore[T] | None = None, concurrency: int = 0
+        self,
+        rate: Rate | RateGroup,
+        store: BaseStore[T] | None = None,
+        concurrency: int = 0,
     ) -> None:
         self._limit = RateLimit(rate, store)
 

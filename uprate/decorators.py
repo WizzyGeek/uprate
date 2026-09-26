@@ -5,7 +5,17 @@ from inspect import iscoroutinefunction
 from collections.abc import Coroutine
 from functools import wraps
 from time import sleep as block
-from typing import TYPE_CHECKING, Any, Callable, ParamSpec, Protocol, TypeVar, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ParamSpec,
+    Protocol,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from ._sync import SyncRateLimit, SyncStore
 from ._utils import maybe_awaitable
@@ -106,9 +116,10 @@ def ratelimit(
         ``on_retry`` parameter is not provided and the decorated function got ratelimited.
     """
     if TYPE_CHECKING:
+
         @overload
         def decorator(
-            func: Callable[P, Coroutine[Any, Any, R]]
+            func: Callable[P, Coroutine[Any, Any, R]],
         ) -> LimitedCallable[P, Coroutine[Any, Any, R]]: ...
 
         @overload
@@ -117,11 +128,16 @@ def ratelimit(
     def decorator(func: Callable[..., Any]) -> Any:
         nonlocal on_retry, key
         key_func = key or cast(
-            Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + getattr(func, "__name__", "<UNNAMEDCALLABLE>")
+            Callable[..., Key],
+            lambda *a, **k: (
+                "DEFAULT_BUCKET_" + getattr(func, "__name__", "<UNNAMEDCALLABLE>")
+            ),
         )
 
         if iscoroutinefunction(func):
-            if ((not isinstance(store, SyncStore)) and isinstance(store, BaseStore)) or store is None:
+            if (
+                (not isinstance(store, SyncStore)) and isinstance(store, BaseStore)
+            ) or store is None:
                 limit: RateLimit = RateLimit(rate, store)
             else:
                 raise TypeError(

@@ -5,13 +5,14 @@ from inspect import iscoroutinefunction
 from collections.abc import Coroutine
 from functools import wraps
 from time import sleep as block
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, ParamSpec, Protocol, TypeVar, Union, cast, overload
 
 from ._sync import SyncRateLimit, SyncStore
 from ._utils import maybe_awaitable
 from .errors import RateLimitError
 from .ratelimit import RateLimit
 from .store import BaseStore
+from uprate import _utils
 
 if TYPE_CHECKING:
     from .rate import Rate, RateGroup
@@ -21,19 +22,20 @@ __all__ = ("on_retry_sleep", "on_retry_block", "ratelimit")
 Key = TypeVar("Key")
 """An unbound and unconstrained TypeVar"""
 
+P = ParamSpec("P")
 R = TypeVar("R", covariant=True)
 
 AnyRateLimit = Union[SyncRateLimit, RateLimit]
 
 
-class LimitedCallable(Protocol[R]):
+class LimitedCallable(Protocol[P, R]):
     limit: AnyRateLimit
 
-    def __call__(self, *args, **kwds) -> R: ...
+    def __call__(self, *args: P.args, **kwds: P.kwargs) -> R: ...
 
 
-def _apply_attrs(func: Callable[..., R], **attrs) -> LimitedCallable[R]:
-    func = cast(LimitedCallable[R], func)
+def _apply_attrs(func: Callable[P, R], **attrs) -> LimitedCallable[P, R]:
+    func = cast(LimitedCallable[P, R], func)
 
     for k, v in attrs.items():
         setattr(func, k, v)
@@ -103,16 +105,24 @@ def ratelimit(
     :exc:`.RateLimitError`
         ``on_retry`` parameter is not provided and the decorated function got ratelimited.
     """
+    if TYPE_CHECKING:
+        @overload
+        def decorator(
+            func: Callable[P, Coroutine[Any, Any, R]]
+        ) -> LimitedCallable[P, Coroutine[Any, Any, R]]: ...
 
-    def decorator(func: Callable[..., R]) -> LimitedCallable[R]:
+        @overload
+        def decorator(func: Callable[P, R]) -> LimitedCallable[P, R]: ...
+
+    def decorator(func: Callable[..., Any]) -> Any:
         nonlocal on_retry, key
-        key = key or cast(
-            Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + func.__name__
+        key_func = key or cast(
+            Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + getattr(func, "__name__", "<UNNAMEDCALLABLE>")
         )
 
         if iscoroutinefunction(func):
-            if isinstance(store, BaseStore) or store is None:
-                limit: AnyRateLimit = RateLimit(rate, store)
+            if ((not isinstance(store, SyncStore)) and isinstance(store, BaseStore)) or store is None:
+                limit: RateLimit = RateLimit(rate, store)
             else:
                 raise TypeError(
                     "Cannot use a uprate._sync.SyncStore instance with a coroutine function."
@@ -122,7 +132,7 @@ def ratelimit(
             async def rated(*args, **kwargs):
                 while True:
                     try:
-                        bucket = await maybe_awaitable(key(*args, **kwargs))
+                        bucket = await maybe_awaitable(key_func(*args, **kwargs))
                         await limit.acquire(bucket)
                     except RateLimitError as err:
                         if on_retry is None:
@@ -131,20 +141,22 @@ def ratelimit(
                             await maybe_awaitable(on_retry(err))
                     else:
                         return await func(*args, **kwargs)
+
+            return _apply_attrs(rated, limit=limit)
         else:
             if isinstance(store, SyncStore) or store is None:
-                limit = SyncRateLimit(rate, store)
+                limit_sync = SyncRateLimit(rate, store)
             else:
                 raise TypeError(
                     "Cannot use a uprate.BaseStore instance with a subroutine."
                 )
 
             @wraps(func)
-            def rated(*args, **kwargs):
+            def rated_sync(*args, **kwargs):
                 while True:
                     try:
-                        bucket = key(*args, **kwargs)
-                        limit.acquire(bucket)
+                        bucket = key_func(*args, **kwargs)
+                        limit_sync.acquire(bucket)
                     except RateLimitError as err:
                         if on_retry is None:
                             raise err from None
@@ -153,6 +165,6 @@ def ratelimit(
                     else:
                         return func()
 
-        return _apply_attrs(rated, limit=limit)
+            return _apply_attrs(rated_sync, limit=limit_sync)
 
     return decorator

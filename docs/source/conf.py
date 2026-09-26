@@ -21,9 +21,9 @@ from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 
-project = 'Uprate'
-copyright = '2021, WizzyGeek'
-author = 'WizzyGeek'
+project = "Uprate"
+copyright = "2021, WizzyGeek"
+author = "WizzyGeek"
 
 # The full version, including alpha/beta/rc tags
 
@@ -38,7 +38,7 @@ except (ModuleNotFoundError, ImportError):
                 release = i.split("=")[1].strip('" \n')
                 break
 
-if release is None: # fail early
+if release is None:  # fail early
     raise RuntimeError("Could not get uprate's version")
 
 
@@ -53,10 +53,10 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinx_copybutton"
+    "sphinx_copybutton",
 ]
 
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
@@ -71,19 +71,17 @@ napoleon_use_rtype = True
 napoleon_type_aliases = None
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
+    "python": ("https://docs.python.org/3", None),
 }
 
 
 # MyST extensions
-myst_enable_extensions = [
-    "colon_fence"
-]
+myst_enable_extensions = ["colon_fence"]
 
 suppress_warnings = ["myst.header"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relat ive to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -96,12 +94,12 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_theme = 'furo'
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 html_logo = "_static/uprate_icon.png"
 
@@ -109,11 +107,12 @@ html_theme_options = {
     "dark_css_variables": {
         "color-api-keyword": "#40ffff",
         "color-background-primary": "#0c0e11",
-        "color-background-secondary": "#020202"
+        "color-background-secondary": "#020202",
     }
 }
 
 _up_static = Path(__file__).parent / "_static"
+
 
 # Use css files in _static if present,
 # This will only happen in a dev environment where
@@ -122,6 +121,7 @@ def _up_css_path(file: str) -> str:
     if (_up_static / file).is_file():
         return file
     return "css/" + file
+
 
 def setup(app):
     app.add_css_file(_up_css_path("custom.css"))

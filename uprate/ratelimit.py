@@ -9,12 +9,11 @@ from uprate.store import BaseStore, MemoryStore
 from .errors import RateLimitError
 from .rate import Rate, RateGroup
 
-__all__ = (
-    "RateLimit",
-)
+__all__ = ("RateLimit",)
 
 H = TypeVar("H")
 """A TypeVar"""
+
 
 class RateLimit(Generic[H]):
     """Enforces multiple rates per provided keys.
@@ -42,24 +41,32 @@ class RateLimit(Generic[H]):
     store : :class:`~uprate.store.BaseStore`
         The store in use for this RateLimit.
     """
+
     rates: tuple[Rate, ...]
     store: BaseStore[H]
 
-    def __init__(self, rate: Union[Rate, RateGroup], store: Optional[BaseStore[H]] = None) -> None:
+    def __init__(
+        self, rate: Union[Rate, RateGroup], store: Optional[BaseStore[H]] = None
+    ) -> None:
         if isinstance(rate, Rate):
             self.rates = (rate,)
         elif isinstance(rate, RateGroup):
             rate._data.sort(key=attrgetter("period"))
             self.rates = tuple(rate._data)
         else:
-            raise TypeError(f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}")
+            raise TypeError(
+                f"Expected instance of uprate.rate.Rate or uprate.rate.RateGroup Instead got {type(rate)}"
+            )
 
         if store is None:
             self.store = MemoryStore()
         elif isinstance(store, BaseStore):
             self.store = store
         else:
-            raise TypeError("Expected a type deriving from uprate.store.BaseStore instead got " + str(type(store)))
+            raise TypeError(
+                "Expected a type deriving from uprate.store.BaseStore instead got "
+                + str(type(store))
+            )
 
         self.store.setup(self)
 
@@ -82,7 +89,7 @@ class RateLimit(Generic[H]):
         if not res:
             # cast is ugly, overloads don't work (parameters don't change)
             # TODO: https://www.python.org/dev/peps/pep-0647/
-            raise RateLimitError(retry_at=retry + unix(), rate=rate) # type: ignore[arg-type]
+            raise RateLimitError(retry_at=retry + unix(), rate=rate)  # type: ignore[arg-type]
 
     async def reset(self, key: H = None) -> None:
         """Reset the given key.

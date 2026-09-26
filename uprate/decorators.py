@@ -15,11 +15,7 @@ from .store import BaseStore
 if TYPE_CHECKING:
     from .rate import Rate, RateGroup
 
-__all__ = (
-    "on_retry_sleep",
-    "on_retry_block",
-    "ratelimit"
-)
+__all__ = ("on_retry_sleep", "on_retry_block", "ratelimit")
 
 Key = TypeVar("Key")
 """An unbound and unconstrained TypeVar"""
@@ -28,11 +24,12 @@ R = TypeVar("R", covariant=True)
 
 AnyRateLimit = Union[SyncRateLimit, RateLimit]
 
+
 class LimitedCallable(Protocol[R]):
     limit: AnyRateLimit
 
-    def __call__(self, *args, **kwds) -> R:
-        ...
+    def __call__(self, *args, **kwds) -> R: ...
+
 
 def _apply_attrs(func: Callable[..., R], **attrs) -> LimitedCallable[R]:
     func = cast(LimitedCallable[R], func)
@@ -41,6 +38,7 @@ def _apply_attrs(func: Callable[..., R], **attrs) -> LimitedCallable[R]:
         setattr(func, k, v)
 
     return func
+
 
 async def on_retry_sleep(error: RateLimitError) -> None:
     """Make the current task yield to the event_loop
@@ -54,6 +52,7 @@ async def on_retry_sleep(error: RateLimitError) -> None:
     """
     await sleep(error.retry_after)
 
+
 def on_retry_block(error: RateLimitError) -> None:
     """Block the current thread till a usage token is
     available for the rate limit which raised
@@ -66,12 +65,16 @@ def on_retry_block(error: RateLimitError) -> None:
     """
     block(error.retry_after)
 
+
 # TODO: Complete Docs
 def ratelimit(
-    rate: Rate | RateGroup, *,
+    rate: Rate | RateGroup,
+    *,
     key: Callable[..., Key] | Callable[..., Coroutine[Any, Any, Key]] | None = None,
-    on_retry: Callable[[RateLimitError], Any] | Callable[[RateLimitError], Coroutine] | None = None,
-    store: BaseStore | SyncStore | None = None
+    on_retry: Callable[[RateLimitError], Any]
+    | Callable[[RateLimitError], Coroutine]
+    | None = None,
+    store: BaseStore | SyncStore | None = None,
 ):
     """Limit a coroutine function or a callable to be called within
     provided rate. :ref:`Example here <index-example>`
@@ -99,15 +102,20 @@ def ratelimit(
     :exc:`.RateLimitError`
         ``on_retry`` parameter is not provided and the decorated function got ratelimited.
     """
+
     def decorator(func: Callable[..., R]) -> LimitedCallable[R]:
         nonlocal on_retry, key
-        key = key or cast(Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + func.__name__)
+        key = key or cast(
+            Callable[..., Key], lambda *a, **k: "DEFAULT_BUCKET_" + func.__name__
+        )
 
         if iscoroutinefunction(func):
             if isinstance(store, BaseStore) or store is None:
                 limit: AnyRateLimit = RateLimit(rate, store)
             else:
-                raise TypeError("Cannot use a uprate._sync.SyncStore instance with a coroutine function.")
+                raise TypeError(
+                    "Cannot use a uprate._sync.SyncStore instance with a coroutine function."
+                )
 
             @wraps(func)
             async def rated(*args, **kwargs):
@@ -126,7 +134,9 @@ def ratelimit(
             if isinstance(store, SyncStore) or store is None:
                 limit = SyncRateLimit(rate, store)
             else:
-                raise TypeError("Cannot use a uprate.BaseStore instance with a subroutine.")
+                raise TypeError(
+                    "Cannot use a uprate.BaseStore instance with a subroutine."
+                )
 
             @wraps(func)
             def rated(*args, **kwargs):
@@ -145,4 +155,3 @@ def ratelimit(
         return _apply_attrs(rated, limit=limit)
 
     return decorator
-

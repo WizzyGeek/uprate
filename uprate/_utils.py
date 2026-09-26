@@ -28,9 +28,11 @@ def monotonic_to_unix(time_sec: float) -> float:
     """Converts a monotonic timestamp in seconds to unix timestamp in seconds"""
     return time_sec + get_unix_monotonic_delta() / 1e9
 
+
 def monotonic_to_unix_ns(time_nano: int) -> int:
     """Converts a monotonic timestamp in nanoseconds to unix timestamp in nanoseconds"""
     return time_nano + get_unix_monotonic_delta()
+
 
 def get_unix_monotonic_delta() -> int:
     global GLOBAL_UNIX_MONO_DELTA_NS
@@ -46,7 +48,10 @@ def get_unix_monotonic_delta() -> int:
 
     return GLOBAL_UNIX_MONO_DELTA_NS
 
-def _find_clock_delta(clocku: Clock, clockm: Clock, nsamples: int = 5) -> tuple[int, bool]:
+
+def _find_clock_delta(
+    clocku: Clock, clockm: Clock, nsamples: int = 5
+) -> tuple[int, bool]:
     """Finds the delta between two clocks
 
     Working
@@ -128,6 +133,7 @@ def _find_clock_delta(clocku: Clock, clockm: Clock, nsamples: int = 5) -> tuple[
         ndrop = len(samples) // 4
         samples = samples[ndrop:-ndrop]
     return sum(samples) // len(samples), True
+
 
 # Formula 1 (Rigid Optimum): (3*(U1 + U3) + 2*U2 - (M1 + 3*M2 + 3*M3 + M4)) // 8
 # Discarded because it assumes a perfectly rigid textbook execution grid, causing it to fail under real-world asymmetric system call latencies.

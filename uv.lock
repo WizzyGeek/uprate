@@ -1111,7 +1111,6 @@ source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [
-    { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
 ]
@@ -1122,12 +1121,14 @@ docs = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-copybutton", marker = "python_full_version >= '3.11'" },
 ]
+type-checking = [
+    { name = "mypy" },
+]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mypy", marker = "python_full_version >= '3.10'", specifier = ">=2.3.1" },
     { name = "pytest", marker = "python_full_version >= '3.10'", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", marker = "python_full_version >= '3.10'", specifier = ">=1.4.0" },
 ]
@@ -1137,6 +1138,7 @@ docs = [
     { name = "sphinx", marker = "python_full_version >= '3.11'", specifier = ">=9" },
     { name = "sphinx-copybutton", marker = "python_full_version >= '3.11'", specifier = ">=0.5.2" },
 ]
+type-checking = [{ name = "mypy", specifier = ">=2.3.1" }]
 
 [[package]]
 name = "urllib3"

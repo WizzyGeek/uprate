@@ -1,6 +1,6 @@
 [project]
 name = "uprate"
-version = "0.3"
+version = "0.4"
 description = "Ratelimits. Dumbified. A fully typed, simple ratelimit library."
 authors = [{ name = "WizzyGeek", email = "ojasscoding@gmail.com" }]
 requires-python = ">=3.10,<4"

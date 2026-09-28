@@ -245,3 +245,6 @@ docs/source/_static/*.css*
 
 
 .venv*/
+
+# runt.py
+logs/
